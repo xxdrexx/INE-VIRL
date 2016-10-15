@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<topology xmlns="http://www.cisco.com/VIRL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="0.9" simulationEngine="OPENSTACK" xsi:schemaLocation="http://www.cisco.com/VIRL https://raw.github.com/CiscoVIRL/schema/v0.9/virl.xsd">
-    <node name="R1" type="SIMPLE" subtype="IOSv" location="57,131"><extensions><entry key="config" type="String">hostname R1
+<topology xmlns="http://www.cisco.com/VIRL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="0.95" xsi:schemaLocation="http://www.cisco.com/VIRL https://raw.github.com/CiscoVIRL/schema/v0.95/virl.xsd">
+    <node name="R1" type="SIMPLE" subtype="IOSv" location="57,131">
+        <extensions>
+            <entry key="config" type="String">hostname R1
 !
 no ip domain lookup
 !
@@ -27,10 +29,14 @@ interface GigabitEthernet0/1.122
  ipv6 address 2001:10:1:122::1/64
 !
 end
-</entry></extensions>
+</entry>
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+        </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
     </node>
-    <node name="R2" type="SIMPLE" subtype="IOSv" location="58,197"><extensions><entry key="config" type="String">hostname R2
+    <node name="R2" type="SIMPLE" subtype="IOSv" location="58,197">
+        <extensions>
+            <entry key="config" type="String">hostname R2
 !
 no ip domain lookup
 !
@@ -57,10 +63,14 @@ interface GigabitEthernet0/1.222
  ipv6 address 2001:10:1:222::2/64
 !
 end
-</entry></extensions>
+</entry>
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+        </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
     </node>
-    <node name="R3" type="SIMPLE" subtype="IOSv" location="59,270"><extensions><entry key="config" type="String">hostname R3
+    <node name="R3" type="SIMPLE" subtype="IOSv" location="59,270">
+        <extensions>
+            <entry key="config" type="String">hostname R3
 !
 no ip domain-lookup
 !
@@ -123,10 +133,14 @@ router bgp 3
 !
 end
 
-</entry></extensions>
+</entry>
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+        </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
     </node>
-    <node name="R4" type="SIMPLE" subtype="IOSv" location="58,345"><extensions><entry key="config" type="String">hostname R4
+    <node name="R4" type="SIMPLE" subtype="IOSv" location="58,345">
+        <extensions>
+            <entry key="config" type="String">hostname R4
 !
 vrf definition 1
  rd 1:1
@@ -183,10 +197,14 @@ router bgp 4
  exit-address-family
 !
 end
-</entry></extensions>
+</entry>
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+        </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
     </node>
-    <node name="R5" type="SIMPLE" subtype="IOSv" location="47,417"><extensions><entry key="config" type="String">hostname R5
+    <node name="R5" type="SIMPLE" subtype="IOSv" location="47,417">
+        <extensions>
+            <entry key="config" type="String">hostname R5
 !
 no ip domain lookup
 !
@@ -209,10 +227,14 @@ interface GigabitEthernet0/1.35
  ipv6 address 2001:100:1:35::5/64
 !
 end
-</entry></extensions>
+</entry>
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+        </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
     </node>
-    <node name="R6" type="SIMPLE" subtype="IOSv" location="49,474"><extensions><entry key="config" type="String">hostname R6
+    <node name="R6" type="SIMPLE" subtype="IOSv" location="49,474">
+        <extensions>
+            <entry key="config" type="String">hostname R6
 !
 no ip domain lookup
 !
@@ -235,10 +257,14 @@ interface GigabitEthernet0/1.46
  ipv6 address 2001:200:1:46::6/64
 !
 end
-</entry></extensions>
+</entry>
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+        </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
     </node>
-    <node name="R7" type="SIMPLE" subtype="IOSv" location="43,552"><extensions><entry key="config" type="String">hostname R7
+    <node name="R7" type="SIMPLE" subtype="IOSv" location="43,552">
+        <extensions>
+            <entry key="config" type="String">hostname R7
 !
 no ip domain lookup
 !
@@ -253,10 +279,14 @@ interface GigabitEthernet0/1.57
  ipv6 address 2001:10:1:57::7/64
 !
 end
-</entry></extensions>
+</entry>
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+        </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
     </node>
-    <node name="R8" type="SIMPLE" subtype="IOSv" location="43,618"><extensions><entry key="config" type="String">hostname R8
+    <node name="R8" type="SIMPLE" subtype="IOSv" location="43,618">
+        <extensions>
+            <entry key="config" type="String">hostname R8
 !
 no ip domain lookup
 !
@@ -271,10 +301,14 @@ interface GigabitEthernet0/1.68
  ipv6 address 2001:10:1:68::8/64
 !
 end
-</entry></extensions>
+</entry>
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+        </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
     </node>
-    <node name="R9" type="SIMPLE" subtype="IOSv" location="37,675"><extensions><entry key="config" type="String">hostname R9
+    <node name="R9" type="SIMPLE" subtype="IOSv" location="37,675">
+        <extensions>
+            <entry key="config" type="String">hostname R9
 !
 no ip domain lookup
 !
@@ -293,10 +327,14 @@ interface GigabitEthernet0/1.239
  ipv6 address 2001:10:1:239::9/64
 !
 end
-</entry></extensions>
+</entry>
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+        </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
     </node>
-    <node name="R10" type="SIMPLE" subtype="IOSv" location="32,741"><extensions><entry key="config" type="String">hostname R10
+    <node name="R10" type="SIMPLE" subtype="IOSv" location="32,741">
+        <extensions>
+            <entry key="config" type="String">hostname R10
 !
 no ip domain lookup
 !
@@ -315,10 +353,14 @@ interface GigabitEthernet0/1.124
  ipv6 address 2001:10:1:124::10/64
 !
 end
-</entry></extensions>
+</entry>
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+        </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
     </node>
-    <node name="SW1" type="SIMPLE" subtype="IOSvL2" location="346,347"><extensions><entry key="config" type="String">hostname SW1
+    <node name="SW1" type="SIMPLE" subtype="IOSvL2" location="346,347">
+        <extensions>
+            <entry key="config" type="String">hostname SW1
 !
 no ip domain-lookup
 !
@@ -341,7 +383,9 @@ interface Vlan221
 !
 end
 
-</entry></extensions>
+</entry>
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+        </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
         <interface id="1" name="GigabitEthernet0/2"/>
         <interface id="2" name="GigabitEthernet0/3"/>
@@ -350,7 +394,9 @@ end
         <interface id="5" name="GigabitEthernet1/2"/>
         <interface id="6" name="GigabitEthernet1/3"/>
     </node>
-    <node name="SW2" type="SIMPLE" subtype="IOSvL2" location="580,343"><extensions><entry key="config" type="String">hostname SW2
+    <node name="SW2" type="SIMPLE" subtype="IOSvL2" location="580,343">
+        <extensions>
+            <entry key="config" type="String">hostname SW2
 !
 no ip domain-lookup
 !
@@ -372,7 +418,9 @@ interface Vlan22
 !
 end
 
-</entry></extensions>
+</entry>
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+        </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
         <interface id="1" name="GigabitEthernet0/2"/>
         <interface id="2" name="GigabitEthernet0/3"/>
@@ -380,7 +428,9 @@ end
         <interface id="4" name="GigabitEthernet1/1"/>
         <interface id="5" name="GigabitEthernet1/2"/>
     </node>
-    <node name="SW3" type="SIMPLE" subtype="IOSvL2" location="339,520"><extensions><entry key="config" type="String">hostname SW3
+    <node name="SW3" type="SIMPLE" subtype="IOSvL2" location="339,520">
+        <extensions>
+            <entry key="config" type="String">hostname SW3
 !
 no ip domain-lookup
 !
@@ -394,7 +444,9 @@ interface Vlan239
 !
 end
 
-</entry></extensions>
+</entry>
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+        </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
         <interface id="1" name="GigabitEthernet0/2"/>
         <interface id="2" name="GigabitEthernet0/3"/>
@@ -402,7 +454,9 @@ end
         <interface id="4" name="GigabitEthernet1/1"/>
         <interface id="5" name="GigabitEthernet1/2"/>
     </node>
-    <node name="SW4" type="SIMPLE" subtype="IOSvL2" location="580,519"><extensions><entry key="config" type="String">hostname SW4
+    <node name="SW4" type="SIMPLE" subtype="IOSvL2" location="580,519">
+        <extensions>
+            <entry key="config" type="String">hostname SW4
 !
 no ip domain-lookup
 !
@@ -416,7 +470,9 @@ interface Vlan124
 !
 end
 
-</entry></extensions>
+</entry>
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+        </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
         <interface id="1" name="GigabitEthernet0/2"/>
         <interface id="2" name="GigabitEthernet0/3"/>
@@ -425,6 +481,9 @@ end
         <interface id="5" name="GigabitEthernet1/2"/>
     </node>
     <node name="unmanagedswitch-1" type="SIMPLE" subtype="Unmanaged Switch" location="185,485">
+        <extensions>
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+        </extensions>
         <interface id="0" name="link1"/>
         <interface id="1" name="link2"/>
         <interface id="2" name="link3"/>
@@ -437,6 +496,7 @@ end
         <interface id="9" name="link10"/>
         <interface id="10" name="link11"/>
     </node>
+    <annotations/>
     <connection dst="/virl:topology/virl:node[15]/virl:interface[1]" src="/virl:topology/virl:node[1]/virl:interface[1]"/>
     <connection dst="/virl:topology/virl:node[15]/virl:interface[2]" src="/virl:topology/virl:node[2]/virl:interface[1]"/>
     <connection dst="/virl:topology/virl:node[15]/virl:interface[3]" src="/virl:topology/virl:node[3]/virl:interface[1]"/>
