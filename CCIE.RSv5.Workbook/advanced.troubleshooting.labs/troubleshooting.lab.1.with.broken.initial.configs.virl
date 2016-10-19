@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<topology xmlns="http://www.cisco.com/VIRL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="0.9" simulationEngine="OPENSTACK" xsi:schemaLocation="http://www.cisco.com/VIRL https://raw.github.com/CiscoVIRL/schema/v0.9/virl.xsd">
-    <node name="R1" type="SIMPLE" subtype="IOSv" location="57,131"><extensions><entry key="config" type="String">
+<topology xmlns="http://www.cisco.com/VIRL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="0.95" xsi:schemaLocation="http://www.cisco.com/VIRL https://raw.github.com/CiscoVIRL/schema/v0.95/virl.xsd">
+    <node name="R1" type="SIMPLE" subtype="IOSv" location="57,131">
+        <extensions>
+            <entry key="config" type="String">
 !
 ! Last configuration change at 18:03:26 UTC Sun Jul 13 2014
 !
@@ -277,10 +279,14 @@ line vty 2 4
 !
 !
 end
-</entry></extensions>
+</entry>
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+        </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
     </node>
-    <node name="R2" type="SIMPLE" subtype="IOSv" location="57,197"><extensions><entry key="config" type="String">
+    <node name="R2" type="SIMPLE" subtype="IOSv" location="57,197">
+        <extensions>
+            <entry key="config" type="String">
 !
 ! Last configuration change at 18:02:36 UTC Sun Jul 13 2014
 !
@@ -556,10 +562,14 @@ line vty 2 4
 !
 !
 end
-</entry></extensions>
+</entry>
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+        </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
     </node>
-    <node name="R3" type="SIMPLE" subtype="IOSv" location="57,270"><extensions><entry key="config" type="String">
+    <node name="R3" type="SIMPLE" subtype="IOSv" location="57,270">
+        <extensions>
+            <entry key="config" type="String">
 !
 ! Last configuration change at 18:02:36 UTC Sun Jul 13 2014
 !
@@ -831,10 +841,14 @@ line vty 2 4
 !
 !
 end
-</entry></extensions>
+</entry>
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+        </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
     </node>
-    <node name="R4" type="SIMPLE" subtype="IOSv" location="57,345"><extensions><entry key="config" type="String">
+    <node name="R4" type="SIMPLE" subtype="IOSv" location="57,345">
+        <extensions>
+            <entry key="config" type="String">
 !
 ! Last configuration change at 18:02:36 UTC Sun Jul 13 2014
 !
@@ -1084,10 +1098,14 @@ line vty 2 4
 !
 !
 end
-</entry></extensions>
+</entry>
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+        </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
     </node>
-    <node name="R5" type="SIMPLE" subtype="IOSv" location="57,417"><extensions><entry key="config" type="String">
+    <node name="R5" type="SIMPLE" subtype="IOSv" location="57,417">
+        <extensions>
+            <entry key="config" type="String">
 !
 ! Last configuration change at 18:02:36 UTC Sun Jul 13 2014
 !
@@ -1341,10 +1359,14 @@ event manager applet noname1
  action 3 cli command "no shut"
 !
 end
-</entry></extensions>
+</entry>
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+        </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
     </node>
-    <node name="R6" type="SIMPLE" subtype="IOSv" location="57,474"><extensions><entry key="config" type="String">
+    <node name="R6" type="SIMPLE" subtype="IOSv" location="57,474">
+        <extensions>
+            <entry key="config" type="String">
 !
 ! Last configuration change at 18:02:36 UTC Sun Jul 13 2014
 !
@@ -1530,10 +1552,14 @@ line vty 2 4
 !
 !
 end
-</entry></extensions>
+</entry>
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+        </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
     </node>
-    <node name="R7" type="SIMPLE" subtype="IOSv" location="57,552"><extensions><entry key="config" type="String">
+    <node name="R7" type="SIMPLE" subtype="IOSv" location="57,552">
+        <extensions>
+            <entry key="config" type="String">
 !
 ! Last configuration change at 18:02:36 UTC Sun Jul 13 2014
 !
@@ -1720,10 +1746,14 @@ line vty 2 4
 !
 !
 end
-</entry></extensions>
+</entry>
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+        </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
     </node>
-    <node name="R8" type="SIMPLE" subtype="IOSv" location="57,618"><extensions><entry key="config" type="String">
+    <node name="R8" type="SIMPLE" subtype="IOSv" location="57,618">
+        <extensions>
+            <entry key="config" type="String">
 !
 ! Last configuration change at 18:02:36 UTC Sun Jul 13 2014
 !
@@ -1879,10 +1909,14 @@ line vty 2 4
 !
 !
 end
-</entry></extensions>
+</entry>
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+        </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
     </node>
-    <node name="R9" type="SIMPLE" subtype="IOSv" location="57,675"><extensions><entry key="config" type="String">
+    <node name="R9" type="SIMPLE" subtype="IOSv" location="57,675">
+        <extensions>
+            <entry key="config" type="String">
 !
 ! Last configuration change at 18:02:36 UTC Sun Jul 13 2014
 !
@@ -2048,10 +2082,14 @@ line vty 2 4
 !
 !
 end
-</entry></extensions>
+</entry>
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+        </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
     </node>
-    <node name="R10" type="SIMPLE" subtype="IOSv" location="57,741"><extensions><entry key="config" type="String">
+    <node name="R10" type="SIMPLE" subtype="IOSv" location="57,741">
+        <extensions>
+            <entry key="config" type="String">
 !
 ! Last configuration change at 18:02:36 UTC Sun Jul 13 2014
 !
@@ -2271,10 +2309,15 @@ line vty 2 4
 !
 !
 end
-</entry></extensions>
+</entry>
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+        </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
     </node>
     <node name="SW1" type="SIMPLE" subtype="IOSvL2" location="326,130">
+        <extensions>
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+        </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
         <interface id="1" name="GigabitEthernet0/2"/>
         <interface id="2" name="GigabitEthernet0/3"/>
@@ -2284,6 +2327,9 @@ end
         <interface id="6" name="GigabitEthernet1/3"/>
     </node>
     <node name="SW2" type="SIMPLE" subtype="IOSvL2" location="560,126">
+        <extensions>
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+        </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
         <interface id="1" name="GigabitEthernet0/2"/>
         <interface id="2" name="GigabitEthernet0/3"/>
@@ -2292,6 +2338,9 @@ end
         <interface id="5" name="GigabitEthernet1/2"/>
     </node>
     <node name="SW3" type="SIMPLE" subtype="IOSvL2" location="319,303">
+        <extensions>
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+        </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
         <interface id="1" name="GigabitEthernet0/2"/>
         <interface id="2" name="GigabitEthernet0/3"/>
@@ -2300,6 +2349,9 @@ end
         <interface id="5" name="GigabitEthernet1/2"/>
     </node>
     <node name="SW4" type="SIMPLE" subtype="IOSvL2" location="560,302">
+        <extensions>
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+        </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
         <interface id="1" name="GigabitEthernet0/2"/>
         <interface id="2" name="GigabitEthernet0/3"/>
@@ -2308,6 +2360,9 @@ end
         <interface id="5" name="GigabitEthernet1/2"/>
     </node>
     <node name="unmanagedswitch-1" type="SIMPLE" subtype="Unmanaged Switch" location="185,485">
+        <extensions>
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+        </extensions>
         <interface id="0" name="link1"/>
         <interface id="1" name="link2"/>
         <interface id="2" name="link3"/>
@@ -2322,6 +2377,9 @@ end
         <interface id="11" name="link12"/>
     </node>
     <node name="unmanagedswitch-2" type="SIMPLE" subtype="Unmanaged Switch" location="457,487">
+        <extensions>
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+        </extensions>
         <interface id="0" name="link1"/>
         <interface id="1" name="link2"/>
         <interface id="2" name="link3"/>
@@ -2334,7 +2392,9 @@ end
         <interface id="9" name="link10"/>
         <interface id="10" name="link11"/>
     </node>
-    <node name="R11" type="SIMPLE" subtype="IOSv" location="715,135"><extensions><entry key="config" type="String">
+    <node name="R11" type="SIMPLE" subtype="IOSv" location="715,135">
+        <extensions>
+            <entry key="config" type="String">
 !
 ! Last configuration change at 18:02:36 UTC Sun Jul 13 2014
 !
@@ -2532,10 +2592,14 @@ line vty 2 4
 !
 !
 end
-</entry></extensions>
+</entry>
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+        </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
     </node>
-    <node name="R12" type="SIMPLE" subtype="IOSv" location="715,227"><extensions><entry key="config" type="String">
+    <node name="R12" type="SIMPLE" subtype="IOSv" location="715,227">
+        <extensions>
+            <entry key="config" type="String">
 !
 ! Last configuration change at 18:02:36 UTC Sun Jul 13 2014
 !
@@ -2732,10 +2796,14 @@ line vty 2 4
 !
 !
 end
-</entry></extensions>
+</entry>
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+        </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
     </node>
-    <node name="R13" type="SIMPLE" subtype="IOSv" location="715,298"><extensions><entry key="config" type="String">
+    <node name="R13" type="SIMPLE" subtype="IOSv" location="715,298">
+        <extensions>
+            <entry key="config" type="String">
 !
 ! Last configuration change at 18:02:36 UTC Sun Jul 13 2014
 !
@@ -2915,10 +2983,14 @@ line vty 2 4
 !
 !
 end
-</entry></extensions>
+</entry>
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+        </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
     </node>
-    <node name="R14" type="SIMPLE" subtype="IOSv" location="715,370"><extensions><entry key="config" type="String">
+    <node name="R14" type="SIMPLE" subtype="IOSv" location="715,370">
+        <extensions>
+            <entry key="config" type="String">
 !
 ! Last configuration change at 18:02:36 UTC Sun Jul 13 2014
 !
@@ -3141,10 +3213,14 @@ line vty 2 4
 !
 !
 end
-</entry></extensions>
+</entry>
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+        </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
     </node>
-    <node name="R15" type="SIMPLE" subtype="IOSv" location="715,441"><extensions><entry key="config" type="String">
+    <node name="R15" type="SIMPLE" subtype="IOSv" location="715,441">
+        <extensions>
+            <entry key="config" type="String">
 !
 ! Last configuration change at 18:02:36 UTC Sun Jul 13 2014
 !
@@ -3305,10 +3381,14 @@ line vty 2 4
 !
 !
 end
-</entry></extensions>
+</entry>
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+        </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
     </node>
-    <node name="R16" type="SIMPLE" subtype="IOSv" location="715,498"><extensions><entry key="config" type="String">
+    <node name="R16" type="SIMPLE" subtype="IOSv" location="715,498">
+        <extensions>
+            <entry key="config" type="String">
 !
 ! Last configuration change at 18:02:36 UTC Sun Jul 13 2014
 !
@@ -3566,10 +3646,14 @@ line vty 2 4
 !
 !
 end
-</entry></extensions>
+</entry>
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+        </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
     </node>
-    <node name="R17" type="SIMPLE" subtype="IOSv" location="715,575"><extensions><entry key="config" type="String">
+    <node name="R17" type="SIMPLE" subtype="IOSv" location="715,575">
+        <extensions>
+            <entry key="config" type="String">
 !
 ! Last configuration change at 18:02:36 UTC Sun Jul 13 2014
 !
@@ -3744,10 +3828,14 @@ line vty 2 4
 !
 !
 end
-</entry></extensions>
+</entry>
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+        </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
     </node>
-    <node name="R18" type="SIMPLE" subtype="IOSv" location="715,638"><extensions><entry key="config" type="String">
+    <node name="R18" type="SIMPLE" subtype="IOSv" location="715,638">
+        <extensions>
+            <entry key="config" type="String">
 !
 ! Last configuration change at 18:02:36 UTC Sun Jul 13 2014
 !
@@ -3965,10 +4053,14 @@ line vty 2 4
 !
 !
 end
-</entry></extensions>
+</entry>
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+        </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
     </node>
-    <node name="R19" type="SIMPLE" subtype="IOSv" location="715,709"><extensions><entry key="config" type="String">
+    <node name="R19" type="SIMPLE" subtype="IOSv" location="715,709">
+        <extensions>
+            <entry key="config" type="String">
 !
 ! Last configuration change at 18:02:36 UTC Sun Jul 13 2014
 !
@@ -4165,10 +4257,14 @@ line vty 5
  login
 !
 !
-end</entry></extensions>
+end</entry>
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+        </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
     </node>
-    <node name="R20" type="SIMPLE" subtype="IOSv" location="715,774"><extensions><entry key="config" type="String">
+    <node name="R20" type="SIMPLE" subtype="IOSv" location="715,774">
+        <extensions>
+            <entry key="config" type="String">
 !
 ! Last configuration change at 18:02:36 UTC Sun Jul 13 2014
 !
@@ -4361,9 +4457,12 @@ line vty 5
  login
 !
 !
-end</entry></extensions>
+end</entry>
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+        </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
     </node>
+    <annotations/>
     <connection dst="/virl:topology/virl:node[15]/virl:interface[1]" src="/virl:topology/virl:node[1]/virl:interface[1]"/>
     <connection dst="/virl:topology/virl:node[15]/virl:interface[2]" src="/virl:topology/virl:node[2]/virl:interface[1]"/>
     <connection dst="/virl:topology/virl:node[15]/virl:interface[3]" src="/virl:topology/virl:node[3]/virl:interface[1]"/>
