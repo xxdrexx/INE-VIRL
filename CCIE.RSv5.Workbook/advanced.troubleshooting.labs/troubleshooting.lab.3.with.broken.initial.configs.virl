@@ -2,17 +2,14 @@
 <topology xmlns="http://www.cisco.com/VIRL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="0.95" xsi:schemaLocation="http://www.cisco.com/VIRL https://raw.github.com/CiscoVIRL/schema/v0.95/virl.xsd">
     <node name="R1" type="SIMPLE" subtype="IOSv" location="57,131">
         <extensions>
-            <entry key="config" type="String">
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+            <entry key="config" type="String">!
+! Last configuration change at 01:14:39 UTC Thu Oct 20 2016
 !
-! Last configuration change at 00:20:54 UTC Wed Oct 22 2014
-enable
-configure terminal
-!
-version 15.4
+version 15.6
 service timestamps debug datetime msec
 service timestamps log datetime msec
-no platform punt-keepalive disable-kernel-core
-platform console serial
+no service password-encryption
 !
 hostname R1
 !
@@ -21,10 +18,17 @@ boot-end-marker
 !
 !
 no logging buffered
-no logging console
 no logging monitor
 !
 no aaa new-model
+ethernet lmi ce
+!
+!
+!
+mmi polling-interval 60
+no mmi auto-configure
+no mmi pvc
+mmi snmp-timeout 180
 !
 !
 !
@@ -34,43 +38,34 @@ no aaa new-model
 !
 !
 !
-
-
-ip multicast-routing distributed
+!
+!
 no ip domain lookup
-
-!
-!
-!
+ip multicast-routing 
+ip cef
 ipv6 unicast-routing
+ipv6 cef
 ipv6 dhcp pool ipv6-dhcp-pool
  prefix-delegation pool ipv6-pool
 !
 no ipv6 dhcp server join all-dhcp-servers
 !
-!
-!
-!
-!
-!
-!
-subscriber templating
-!
 multilink bundle-name authenticated
 !
-
-license udi pid CSR1000V sn 92HVO0PSL3U
-license boot level ax
-spanning-tree extend system-id
 !
+!
+crypto pki trustpoint TP-self-signed-4294967295
+ enrollment selfsigned
+ subject-name cn=IOS-Self-Signed-Certificate-4294967295
+ revocation-check none
+ rsakeypair TP-self-signed-4294967295
+!
+!
+crypto pki certificate chain TP-self-signed-4294967295
+ certificate self-signed 01 nvram:IOS-Self-Sig#1.cer
 username cisco privilege 15 secret 5 $1$6cdl$cmjLSX79LVHEnbYagSKEm/
 !
 redundancy
- mode none
-!
-!
-!
-!
 !
 !
 ip tcp synwait-time 5
@@ -86,9 +81,6 @@ ip tcp synwait-time 5
 !
 !
 !
-!
-! 
-! 
 bba-group pppoe r1-r17
  virtual-template 117
 !
@@ -99,9 +91,18 @@ interface Loopback0
  ip ospf 100 area 0
  ipv6 address ::192:122:3:1/128
 !
+interface GigabitEthernet0/0
+ no ip address
+ shutdown
+ duplex auto
+ speed auto
+ media-type rj45
+!
 interface GigabitEthernet0/1
- no shutdown
- negotiation auto
+ no ip address
+ duplex auto
+ speed auto
+ media-type rj45
 !
 interface GigabitEthernet0/1.12
  encapsulation dot1Q 12
@@ -152,11 +153,6 @@ interface GigabitEthernet0/1.117
  ipv6 address 2001:89:211:117::1/125
  pppoe enable group r1-r17
 !
-interface GigabitEthernet2
- description MGMT INTERFACE - DO NOT CHANGE
- ip address 192.168.1.1 255.255.255.0
- negotiation auto
-!
 interface Virtual-Template117
  ip address 89.211.117.1 255.255.255.128
  ip pim sparse-mode
@@ -183,8 +179,8 @@ router eigrp INE_CCIE
  exit-address-family
 !
 router ospf 100
+ mpls ldp autoconfig
  router-id 192.122.3.1
- fast-reroute per-prefix enable prefix-priority low
  area 20 virtual-link 192.122.3.3
  area 121 nssa default-information-originate
  summary-address 192.122.3.7 255.255.255.255 not-advertise
@@ -192,15 +188,10 @@ router ospf 100
  redistribute connected subnets route-map CONNECTED_INTO_OSPF
  redistribute eigrp 56 subnets route-map EIGRP_INTO_OSPF_REDISTRIBUTION
  passive-interface GigabitEthernet0/1.117
- mpls ldp autoconfig
-!
-!
-virtual-service csr_mgmt
- ip shared host-interface GigabitEthernet2
- activate
 !
 ip local pool r1-r17-pool 89.211.117.17
 ip forward-protocol nd
+!
 !
 no ip http server
 ip http secure-server
@@ -219,11 +210,38 @@ route-map CONNECTED_INTO_OSPF permit 20
  match interface GigabitEthernet0/1.17 GigabitEthernet0/1.18
  set tag 190
 !
-mpls ldp router-id Loopback0 force
 !
+mpls ldp router-id Loopback0 force
 !
 control-plane
 !
+banner exec `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+banner incoming `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+banner login `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
 !
 line con 0
  exec-timeout 0 0
@@ -233,34 +251,33 @@ line con 0
  login
  length 0
  stopbits 1
+line aux 0
 line vty 0 4
  no login
+ transport input none
 line vty 5
  privilege level 15
  logging synchronous
  no login
  rotary 1
+ transport input none
 !
+no scheduler allocate
 !
-end
-</entry>
-            <entry key="Auto-generate config" type="Boolean">false</entry>
+end</entry>
         </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
     </node>
     <node name="R2" type="SIMPLE" subtype="IOSv" location="57,197">
         <extensions>
-            <entry key="config" type="String">
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+            <entry key="config" type="String">!
+! Last configuration change at 01:16:09 UTC Thu Oct 20 2016
 !
-! Last configuration change at 00:20:54 UTC Wed Oct 22 2014
-enable
-configure terminal
-!
-version 15.4
+version 15.6
 service timestamps debug datetime msec
 service timestamps log datetime msec
-no platform punt-keepalive disable-kernel-core
-platform console serial
+no service password-encryption
 !
 hostname R2
 !
@@ -280,10 +297,17 @@ vrf definition VPN_CCIE
  exit-address-family
 !
 no logging buffered
-no logging console
 no logging monitor
 !
 no aaa new-model
+ethernet lmi ce
+!
+!
+!
+mmi polling-interval 60
+no mmi auto-configure
+no mmi pvc
+mmi snmp-timeout 180
 !
 !
 !
@@ -293,40 +317,22 @@ no aaa new-model
 !
 !
 !
-
-
-ip multicast-routing distributed
+!
+!
 no ip domain lookup
-
-!
-!
-!
+ip multicast-routing 
+ip cef
 ipv6 unicast-routing
-!
-!
-!
-!
-!
-!
-!
-subscriber templating
+ipv6 cef
 !
 multilink bundle-name authenticated
 !
 !
 !
-license udi pid CSR1000V sn 9DMEUSB233Y
-license boot level ax
-spanning-tree extend system-id
 !
 username cisco privilege 15 secret 5 $1$9H4L$UfimLXQ4lSPzrWHodspQL/
 !
 redundancy
- mode none
-!
-!
-!
-!
 !
 !
 ip tcp synwait-time 5
@@ -343,18 +349,24 @@ ip tcp synwait-time 5
 !
 !
 !
-! 
-! 
-!
 interface Loopback0
  description Local Loopback
  ip address 192.122.3.2 255.255.255.0
  ip ospf 100 area 0
  ipv6 address ::192:122:3:2/128
 !
+interface GigabitEthernet0/0
+ no ip address
+ shutdown
+ duplex auto
+ speed auto
+ media-type rj45
+!
 interface GigabitEthernet0/1
- no shutdown
- negotiation auto
+ no ip address
+ duplex auto
+ speed auto
+ media-type rj45
 !
 interface GigabitEthernet0/1.12
  encapsulation dot1Q 12
@@ -392,13 +404,8 @@ interface GigabitEthernet0/1.216
 interface GigabitEthernet0/1.240
  ip pim sparse-mode
 !
-interface GigabitEthernet2
- ip address 192.168.1.2 255.255.255.0
- negotiation auto
-!
 router ospf 100
  router-id 192.122.3.2
- fast-reroute per-prefix enable prefix-priority low
  area 30 virtual-link 192.122.3.4
  area 121 nssa default-information-originate
  redistribute connected subnets route-map CONNECTED_INTO_OSPF
@@ -425,10 +432,8 @@ router bgp 65006
   neighbor 202.4.210.10 maximum-prefix 1000 80 restart 5
  exit-address-family
 !
-!
-virtual-service csr_mgmt
-!
 ip forward-protocol nd
+!
 !
 no ip http server
 no ip http secure-server
@@ -439,11 +444,38 @@ route-map CONNECTED_INTO_OSPF permit 10
  set metric 1000
  set metric-type type-1
 !
-mpls ldp router-id Loopback0 force
 !
+mpls ldp router-id Loopback0 force
 !
 control-plane
 !
+banner exec `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+banner incoming `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+banner login `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
 !
 line con 0
  exec-timeout 0 0
@@ -452,35 +484,34 @@ line con 0
  logging synchronous
  login
  stopbits 1
+line aux 0
 line vty 0 4
  privilege level 15
  no login
+ transport input none
 line vty 5
  privilege level 15
  logging synchronous
  no login
  rotary 1
+ transport input none
 !
+no scheduler allocate
 !
-end
-</entry>
-            <entry key="Auto-generate config" type="Boolean">false</entry>
+end</entry>
         </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
     </node>
     <node name="R3" type="SIMPLE" subtype="IOSv" location="57,270">
         <extensions>
-            <entry key="config" type="String">
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+            <entry key="config" type="String">!
+! Last configuration change at 01:15:53 UTC Thu Oct 20 2016
 !
-! Last configuration change at 00:20:54 UTC Wed Oct 22 2014
-enable
-configure terminal
-!
-version 15.4
+version 15.6
 service timestamps debug datetime msec
 service timestamps log datetime msec
-no platform punt-keepalive disable-kernel-core
-platform console serial
+no service password-encryption
 !
 hostname R3
 !
@@ -489,10 +520,17 @@ boot-end-marker
 !
 !
 no logging buffered
-no logging console
 no logging monitor
 !
 no aaa new-model
+ethernet lmi ce
+!
+!
+!
+mmi polling-interval 60
+no mmi auto-configure
+no mmi pvc
+mmi snmp-timeout 180
 !
 !
 !
@@ -502,42 +540,33 @@ no aaa new-model
 !
 !
 !
-
-
-ip multicast-routing distributed
+!
+!
 no ip domain lookup
-
-!
-!
-!
+ip multicast-routing 
+ip cef
 ipv6 unicast-routing
+ipv6 cef
 !
-!
-!
-!
-!
-!
-!
-subscriber templating
-!
+multilink bundle-name authenticated
 mpls ldp neighbor 192.122.3.6 password CC!E_!nE
 no mpls ldp advertise-labels
 mpls ldp advertise-labels for 10
-multilink bundle-name authenticated
 !
-
-license udi pid CSR1000V sn 9MALPY1LQP1
-license boot level ax
-spanning-tree extend system-id
 !
+!
+crypto pki trustpoint TP-self-signed-4294967295
+ enrollment selfsigned
+ subject-name cn=IOS-Self-Signed-Certificate-4294967295
+ revocation-check none
+ rsakeypair TP-self-signed-4294967295
+!
+!
+crypto pki certificate chain TP-self-signed-4294967295
+ certificate self-signed 01 nvram:IOS-Self-Sig#1.cer
 username cisco privilege 15 secret 5 $1$Vzie$sVCKvoH/icv6NoOSWuUvt/
 !
 redundancy
- mode none
-!
-!
-!
-!
 !
 !
 ip tcp synwait-time 5
@@ -562,9 +591,6 @@ policy-map COPP_POLICE_IN
 !
 !
 !
-! 
-! 
-!
 interface Loopback0
  description Local Loopback
  ip address 192.122.3.3 255.255.255.255
@@ -585,11 +611,19 @@ interface Tunnel64
  tunnel source ::192:122:3:3
  tunnel mode ipv6
  tunnel destination ::192:122:3:6
- tunnel path-mtu-discovery
+!
+interface GigabitEthernet0/0
+ no ip address
+ shutdown
+ duplex auto
+ speed auto
+ media-type rj45
 !
 interface GigabitEthernet0/1
- no shutdown
- negotiation auto
+ no ip address
+ duplex auto
+ speed auto
+ media-type rj45
 !
 interface GigabitEthernet0/1.13
  encapsulation dot1Q 13
@@ -629,18 +663,13 @@ interface GigabitEthernet0/1.36
  ipv6 rip CCIE metric-offset 2
  mpls ip
 !
-interface GigabitEthernet2
- ip address 192.168.1.3 255.255.255.0
- negotiation auto
-!
 router ospf 100
+ mpls ldp autoconfig
  router-id 192.122.3.3
- fast-reroute per-prefix enable prefix-priority low
  area 20 virtual-link 192.122.3.1
  redistribute connected subnets route-map CONNECTED_INTO_OSPF
  redistribute rip subnets route-map RIP_INTO_OSPF_REDISTRIBUTION
  distribute-list route-map BLOCK_RIP_ROUTES_DISTRIBUTE_LIST_IN in
- mpls ldp autoconfig
 !
 router rip
  version 2
@@ -664,26 +693,18 @@ router bgp 65006
   neighbor ::192:122:3:6 activate
  exit-address-family
 !
-!
-virtual-service csr_mgmt
- ip shared host-interface GigabitEthernet2
- activate
-!
 ip forward-protocol nd
 !
+!
+no ip http server
+ip http secure-server
 ip pim rp-candidate Loopback100
 ip msdp peer 192.122.3.4 connect-source Loopback0
 ip msdp cache-sa-state
-no ip http server
-ip http secure-server
 !
 ip access-list extended PIM
  permit pim any any
 !
-access-list 10 permit 192.122.3.8
-access-list 10 permit 192.122.3.2
-access-list 10 permit 192.122.3.7
-access-list 10 permit 192.122.3.6
 ipv6 route ::192:122:3:66/128 Null0
 ipv6 router rip CCIE
  timers 10 30 30 40
@@ -715,12 +736,43 @@ route-map CONNECTED_INTO_OSPF permit 20
  match interface GigabitEthernet0/1.35 GigabitEthernet0/1.36
  set tag 3120
 !
-mpls ldp router-id Loopback0 force
 !
+mpls ldp router-id Loopback0 force
+access-list 10 permit 192.122.3.8
+access-list 10 permit 192.122.3.2
+access-list 10 permit 192.122.3.7
+access-list 10 permit 192.122.3.6
 !
 control-plane
  service-policy input COPP_POLICE_IN
 !
+banner exec `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+banner incoming `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+banner login `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
 !
 line con 0
  exec-timeout 0 0
@@ -729,34 +781,33 @@ line con 0
  logging synchronous
  login
  stopbits 1
+line aux 0
 line vty 0 4
  no login
+ transport input none
 line vty 5
  privilege level 15
  logging synchronous
  no login
  rotary 1
+ transport input none
 !
+no scheduler allocate
 !
-end
-</entry>
-            <entry key="Auto-generate config" type="Boolean">false</entry>
+end</entry>
         </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
     </node>
     <node name="R4" type="SIMPLE" subtype="IOSv" location="57,345">
         <extensions>
-            <entry key="config" type="String">
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+            <entry key="config" type="String">!
+! Last configuration change at 01:16:00 UTC Thu Oct 20 2016
 !
-! Last configuration change at 00:20:54 UTC Wed Oct 22 2014
-enable
-configure terminal
-!
-version 15.4
+version 15.6
 service timestamps debug datetime msec
 service timestamps log datetime msec
-no platform punt-keepalive disable-kernel-core
-platform console serial
+no service password-encryption
 !
 hostname R4
 !
@@ -765,10 +816,17 @@ boot-end-marker
 !
 !
 no logging buffered
-no logging console
 no logging monitor
 !
 no aaa new-model
+ethernet lmi ce
+!
+!
+!
+mmi polling-interval 60
+no mmi auto-configure
+no mmi pvc
+mmi snmp-timeout 180
 !
 !
 !
@@ -778,42 +836,33 @@ no aaa new-model
 !
 !
 !
-
-
-ip multicast-routing distributed
+!
+!
 no ip domain lookup
-
-!
-!
-!
+ip multicast-routing 
+ip cef
 ipv6 unicast-routing
+ipv6 cef
 !
-!
-!
-!
-!
-!
-!
-subscriber templating
-!
+multilink bundle-name authenticated
 mpls ldp neighbor 192.122.3.6 password CC!E_!nE
 no mpls ldp advertise-labels
 mpls ldp advertise-labels for 10
-multilink bundle-name authenticated
 !
-
-license udi pid CSR1000V sn 92M3KGFZPG9
-license boot level ax
-spanning-tree extend system-id
 !
+!
+crypto pki trustpoint TP-self-signed-4294967295
+ enrollment selfsigned
+ subject-name cn=IOS-Self-Signed-Certificate-4294967295
+ revocation-check none
+ rsakeypair TP-self-signed-4294967295
+!
+!
+crypto pki certificate chain TP-self-signed-4294967295
+ certificate self-signed 01 nvram:IOS-Self-Sig#1.cer
 username cisco privilege 15 secret 5 $1$wfh3$AazCRt8jkpiWa3xmiutoK0
 !
 redundancy
- mode none
-!
-!
-!
-!
 !
 !
 ip tcp synwait-time 5
@@ -838,9 +887,6 @@ policy-map COPP_POLICE_IN
 !
 !
 !
-! 
-! 
-!
 interface Loopback0
  description Local Loopback
  ip address 192.122.3.4 255.255.255.255
@@ -858,9 +904,18 @@ interface Loopback100
  ip pim sparse-mode
  ip ospf 100 area 0
 !
+interface GigabitEthernet0/0
+ no ip address
+ shutdown
+ duplex auto
+ speed auto
+ media-type rj45
+!
 interface GigabitEthernet0/1
- no shutdown
- negotiation auto
+ no ip address
+ duplex auto
+ speed auto
+ media-type rj45
 !
 interface GigabitEthernet0/1.14
  encapsulation dot1Q 14
@@ -902,20 +957,15 @@ interface GigabitEthernet0/1.46
  ipv6 rip CCIE enable
  mpls ip
 !
-interface GigabitEthernet2
- ip address 192.168.1.4 255.255.255.0
- negotiation auto
-!
 router ospf 100
+ mpls ldp autoconfig
  router-id 192.122.3.4
- fast-reroute per-prefix enable prefix-priority low
  area 30 virtual-link 192.122.3.2
  redistribute connected subnets route-map CONNECTED_INTO_OSPF
- redistribute rip subnets route-map RIP_INTO_OSPF_REDISTRIBUTION
  redistribute ospf 200 subnets
+ redistribute rip subnets route-map RIP_INTO_OSPF_REDISTRIBUTION
  neighbor 10.0.24.1
  distribute-list route-map BLOCK_RIP_ROUTES_DISTRIBUTE_LIST_IN in
- mpls ldp autoconfig
 !
 router ospf 200
 !
@@ -956,26 +1006,18 @@ router bgp 65006
   neighbor ::192:122:3:6 activate
  exit-address-family
 !
-!
-virtual-service csr_mgmt
- ip shared host-interface GigabitEthernet2
- activate
-!
 ip forward-protocol nd
 !
+!
+no ip http server
+ip http secure-server
 ip pim rp-candidate Loopback100
 ip msdp peer 192.122.3.3 connect-source Loopback0
 ip msdp cache-sa-state
-no ip http server
-ip http secure-server
 !
 ip access-list extended PIM
  permit pim any any
 !
-access-list 10 permit 192.122.3.8
-access-list 10 permit 192.122.3.2
-access-list 10 permit 192.122.3.7
-access-list 10 permit 192.122.3.6
 ipv6 route ::192:122:3:66/128 Null0
 ipv6 router rip CCIE
  timers 10 30 30 40
@@ -1007,12 +1049,43 @@ route-map CONNECTED_INTO_OSPF permit 20
  match interface GigabitEthernet0/1.45 GigabitEthernet0/1.46 Loopback1
  set tag 4120
 !
-mpls ldp router-id Loopback0 force
 !
+mpls ldp router-id Loopback0 force
+access-list 10 permit 192.122.3.8
+access-list 10 permit 192.122.3.2
+access-list 10 permit 192.122.3.7
+access-list 10 permit 192.122.3.6
 !
 control-plane
  service-policy input COPP_POLICE_IN
 !
+banner exec `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+banner incoming `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+banner login `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
 !
 line con 0
  exec-timeout 0 0
@@ -1021,34 +1094,33 @@ line con 0
  logging synchronous
  login
  stopbits 1
+line aux 0
 line vty 0 4
  no login
+ transport input none
 line vty 5
  privilege level 15
  logging synchronous
  no login
  rotary 1
+ transport input none
 !
+no scheduler allocate
 !
-end
-</entry>
-            <entry key="Auto-generate config" type="Boolean">false</entry>
+end</entry>
         </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
     </node>
     <node name="R5" type="SIMPLE" subtype="IOSv" location="57,417">
         <extensions>
-            <entry key="config" type="String">
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+            <entry key="config" type="String">!
+! Last configuration change at 01:16:29 UTC Thu Oct 20 2016
 !
-! Last configuration change at 00:20:54 UTC Wed Oct 22 2014
-enable
-configure terminal
-!
-version 15.4
+version 15.6
 service timestamps debug datetime msec
 service timestamps log datetime msec
-no platform punt-keepalive disable-kernel-core
-platform console serial
+no service password-encryption
 !
 hostname R5
 !
@@ -1057,10 +1129,17 @@ boot-end-marker
 !
 !
 no logging buffered
-no logging console
 no logging monitor
 !
 no aaa new-model
+ethernet lmi ce
+!
+!
+!
+mmi polling-interval 60
+no mmi auto-configure
+no mmi pvc
+mmi snmp-timeout 180
 !
 !
 !
@@ -1070,40 +1149,31 @@ no aaa new-model
 !
 !
 !
-
-
-ip multicast-routing distributed
+!
+!
 no ip domain lookup
-
-!
-!
-!
+ip multicast-routing 
+ip cef
 ipv6 unicast-routing
+ipv6 cef
 !
-!
-!
-!
-!
-!
-!
-subscriber templating
-!
-mpls ldp neighbor 192.122.3.6 password CC!E_!nE
 multilink bundle-name authenticated
+mpls ldp neighbor 192.122.3.6 password CC!E_!nE
 !
-
-license udi pid CSR1000V sn 9ORST0AKGHD
-license boot level ax
-spanning-tree extend system-id
 !
+!
+crypto pki trustpoint TP-self-signed-4294967295
+ enrollment selfsigned
+ subject-name cn=IOS-Self-Signed-Certificate-4294967295
+ revocation-check none
+ rsakeypair TP-self-signed-4294967295
+!
+!
+crypto pki certificate chain TP-self-signed-4294967295
+ certificate self-signed 01 nvram:IOS-Self-Sig#1.cer
 username cisco privilege 15 secret 5 $1$4d3Y$blN1ys3MQhPaEc2E9DVx0/
 !
 redundancy
- mode none
-!
-!
-!
-!
 !
 !
 ip tcp synwait-time 5
@@ -1120,18 +1190,24 @@ ip tcp synwait-time 5
 !
 !
 !
-! 
-! 
-!
 interface Loopback0
  description Local Loopback
  ip address 192.122.3.5 255.255.255.255
  ipv6 address ::192:122:3:5/128
  ipv6 rip CCIE enable
 !
+interface GigabitEthernet0/0
+ no ip address
+ shutdown
+ duplex auto
+ speed auto
+ media-type rj45
+!
 interface GigabitEthernet0/1
- no shutdown
- negotiation auto
+ no ip address
+ duplex auto
+ speed auto
+ media-type rj45
 !
 interface GigabitEthernet0/1.35
  encapsulation dot1Q 35
@@ -1163,10 +1239,6 @@ interface GigabitEthernet0/1.58
  ip address 136.6.58.5 255.255.255.0
  ip pim sparse-mode
  ipv6 address 2001:136:6:58::5/64
-!
-interface GigabitEthernet2
- ip address 192.168.1.5 255.255.255.0
- negotiation auto
 !
 !
 router eigrp INE_CCIE
@@ -1208,12 +1280,8 @@ router bgp 65006
   neighbor ::192:122:3:6 activate
  exit-address-family
 !
-!
-virtual-service csr_mgmt
- ip shared host-interface GigabitEthernet2
- activate
-!
 ip forward-protocol nd
+!
 !
 no ip http server
 ip http secure-server
@@ -1226,8 +1294,8 @@ ipv6 router rip CCIE
 route-map EIGRP_INTO_RIP_REDISTRIBUTION permit 10
  set tag 590
 !
-mpls ldp router-id Loopback0 force
 !
+mpls ldp router-id Loopback0 force
 !
 ipv6 access-list test
  deny tcp any eq bgp any
@@ -1236,6 +1304,33 @@ ipv6 access-list test
 !
 control-plane
 !
+banner exec `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+banner incoming `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+banner login `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
 !
 line con 0
  exec-timeout 0 0
@@ -1244,34 +1339,33 @@ line con 0
  logging synchronous
  login
  stopbits 1
+line aux 0
 line vty 0 4
  no login
+ transport input none
 line vty 5
  privilege level 15
  logging synchronous
  no login
  rotary 1
+ transport input none
 !
+no scheduler allocate
 !
-end
-</entry>
-            <entry key="Auto-generate config" type="Boolean">false</entry>
+end</entry>
         </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
     </node>
     <node name="R6" type="SIMPLE" subtype="IOSv" location="57,474">
         <extensions>
-            <entry key="config" type="String">
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+            <entry key="config" type="String">!
+! Last configuration change at 01:16:11 UTC Thu Oct 20 2016
 !
-! Last configuration change at 00:20:54 UTC Wed Oct 22 2014
-enable
-configure terminal
-!
-version 15.4
+version 15.6
 service timestamps debug datetime msec
 service timestamps log datetime msec
-no platform punt-keepalive disable-kernel-core
-platform console serial
+no service password-encryption
 !
 hostname R6
 !
@@ -1280,10 +1374,17 @@ boot-end-marker
 !
 !
 no logging buffered
-no logging console
 no logging monitor
 !
 no aaa new-model
+ethernet lmi ce
+!
+!
+!
+mmi polling-interval 60
+no mmi auto-configure
+no mmi pvc
+mmi snmp-timeout 180
 !
 !
 !
@@ -1293,44 +1394,26 @@ no aaa new-model
 !
 !
 !
-
-
-ip multicast-routing distributed
+!
+!
 no ip domain lookup
-
-!
-!
-!
+ip multicast-routing 
+ip cef
 ipv6 unicast-routing
+ipv6 cef
 !
-!
-!
-!
-!
-!
-!
-subscriber templating
-!
+multilink bundle-name authenticated
 mpls ldp password required
 mpls ldp neighbor 192.122.3.3 password CC!E_!nE
 mpls ldp neighbor 192.122.3.4 password CC!E_!nE
 mpls ldp neighbor 192.122.3.5 password CC!E_!nE
-multilink bundle-name authenticated
 !
 !
 !
-license udi pid CSR1000V sn 95OSJ0DCRXR
-license boot level ax
-spanning-tree extend system-id
 !
 username cisco privilege 15 secret 5 $1$eF1d$RtoVvxulLL30InAq01r0F1
 !
 redundancy
- mode none
-!
-!
-!
-!
 !
 !
 ip tcp synwait-time 5
@@ -1347,9 +1430,6 @@ ip tcp synwait-time 5
 !
 !
 !
-! 
-! 
-!
 interface Loopback0
  description Local Loopback
  ip address 192.122.3.6 255.255.255.255
@@ -1365,11 +1445,19 @@ interface Tunnel64
  tunnel source ::192:122:3:6
  tunnel mode ipv6
  tunnel destination ::192:122:3:3
- tunnel path-mtu-discovery
+!
+interface GigabitEthernet0/0
+ no ip address
+ shutdown
+ duplex auto
+ speed auto
+ media-type rj45
 !
 interface GigabitEthernet0/1
- no shutdown
- negotiation auto
+ no ip address
+ duplex auto
+ speed auto
+ media-type rj45
 !
 interface GigabitEthernet0/1.36
  encapsulation dot1Q 36
@@ -1403,10 +1491,6 @@ interface GigabitEthernet0/1.60
  ip pim bsr-border
  ip pim sparse-mode
  ipv6 address 2001:202:4:60::/127
-!
-interface GigabitEthernet2
- ip address 192.168.1.6 255.255.255.0
- negotiation auto
 !
 router rip
  version 2
@@ -1454,12 +1538,10 @@ router bgp 65006
   neighbor 2001:202:4:60::1 send-community both
  exit-address-family
 !
-!
-virtual-service csr_mgmt
-!
 ip forward-protocol nd
 !
 ip community-list 1 permit 4267900929
+!
 no ip http server
 no ip http secure-server
 !
@@ -1482,11 +1564,38 @@ route-map ipv6-policy permit 10
 !
 route-map ipv6-policy permit 20
 !
-mpls ldp router-id Loopback0 force
 !
+mpls ldp router-id Loopback0 force
 !
 control-plane
 !
+banner exec `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+banner incoming `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+banner login `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
 !
 line con 0
  exec-timeout 0 0
@@ -1495,35 +1604,34 @@ line con 0
  logging synchronous
  login
  stopbits 1
+line aux 0
 line vty 0 4
  privilege level 15
  no login
+ transport input none
 line vty 5
  privilege level 15
  logging synchronous
  no login
  rotary 1
+ transport input none
 !
+no scheduler allocate
 !
-end
-</entry>
-            <entry key="Auto-generate config" type="Boolean">false</entry>
+end</entry>
         </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
     </node>
     <node name="R7" type="SIMPLE" subtype="IOSv" location="57,552">
         <extensions>
-            <entry key="config" type="String">
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+            <entry key="config" type="String">!
+! Last configuration change at 01:16:16 UTC Thu Oct 20 2016
 !
-! Last configuration change at 00:20:54 UTC Wed Oct 22 2014
-enable
-configure terminal
-!
-version 15.4
+version 15.6
 service timestamps debug datetime msec
 service timestamps log datetime msec
-no platform punt-keepalive disable-kernel-core
-platform console serial
+no service password-encryption
 !
 hostname R7
 !
@@ -1543,10 +1651,17 @@ vrf definition VPN_CCIE
  exit-address-family
 !
 no logging buffered
-no logging console
 no logging monitor
 !
 no aaa new-model
+ethernet lmi ce
+!
+!
+!
+mmi polling-interval 60
+no mmi auto-configure
+no mmi pvc
+mmi snmp-timeout 180
 !
 !
 !
@@ -1556,46 +1671,34 @@ no aaa new-model
 !
 !
 !
-
-
-ip multicast-routing distributed
+!
+!
 no ip domain lookup
 ip domain name ine.ccie.lab
-
-!
-!
-!
+ip multicast-routing 
+ip cef
 ipv6 unicast-routing
-!
-!
-!
-!
-!
-!
-!
-subscriber templating
+ipv6 cef
 !
 multilink bundle-name authenticated
 !
-
-license udi pid CSR1000V sn 9433QKU0O4I
-license boot level ax
-spanning-tree extend system-id
 !
+!
+crypto pki trustpoint TP-self-signed-4294967295
+ enrollment selfsigned
+ subject-name cn=IOS-Self-Signed-Certificate-4294967295
+ revocation-check none
+ rsakeypair TP-self-signed-4294967295
+!
+!
+crypto pki certificate chain TP-self-signed-4294967295
+ certificate self-signed 01 nvram:IOS-Self-Sig#1.cer
 username cisco privilege 15 secret 5 $1$Mu9z$tjqTeS6Oo3eSGgJSedazC1
 !
 redundancy
- mode none
-!
-!
-!
-!
 !
 !
 ip tcp synwait-time 5
-ip ssh port 4022 rotary 78
-ip ssh source-interface Loopback0
-ip ssh version 2
 ! 
 !
 !
@@ -1608,18 +1711,24 @@ ip ssh version 2
 !
 !
 !
-!
-! 
-! 
 !
 interface Loopback0
  description Local Loopback
  ip address 192.122.3.7 255.255.255.255
  ipv6 address ::192:122:3:7/128
 !
+interface GigabitEthernet0/0
+ no ip address
+ shutdown
+ duplex auto
+ speed auto
+ media-type rj45
+!
 interface GigabitEthernet0/1
- no shutdown
- negotiation auto
+ no ip address
+ duplex auto
+ speed auto
+ media-type rj45
 !
 interface GigabitEthernet0/1.17
  encapsulation dot1Q 17
@@ -1641,10 +1750,6 @@ interface GigabitEthernet0/1.79
  ip address 172.30.79.7 255.255.255.224
  ip pim sparse-mode
  ipv6 address 2001:172:30:79::7/120
-!
-interface GigabitEthernet2
- ip address 192.168.1.7 255.255.255.0
- negotiation auto
 !
 !
 router eigrp INE_CCIE
@@ -1687,11 +1792,6 @@ router bgp 65006
   neighbor 172.30.79.9 route-map RFC1998_INBOUND_SITE_B in
  exit-address-family
 !
-!
-virtual-service csr_mgmt
- ip shared host-interface GigabitEthernet2
- activate
-!
 ip local policy route-map rm
 ip forward-protocol nd
 !
@@ -1699,8 +1799,12 @@ ip bgp-community new-format
 ip community-list 90 permit 65100:90
 ip community-list 99 permit 65100:999
 ip community-list 110 permit 65100:110
+!
 no ip http server
 ip http secure-server
+ip ssh port 4022 rotary 78
+ip ssh source-interface Loopback0
+ip ssh version 2
 !
 ip access-list extended SSHv2_PORT_4022
  permit tcp any any eq 4022
@@ -1726,11 +1830,38 @@ route-map rm permit 10
  match ip address acl
  set interface Null0
 !
-mpls ldp router-id Loopback0 force
 !
+mpls ldp router-id Loopback0 force
 !
 control-plane
 !
+banner exec `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+banner incoming `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+banner login `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
 !
 line con 0
  exec-timeout 0 0
@@ -1739,6 +1870,7 @@ line con 0
  logging synchronous
  login
  stopbits 1
+line aux 0
 line vty 0 4
  access-class SSHv2_PORT_4022 in vrf-also
  login local
@@ -1757,26 +1889,22 @@ line vty 6 98
  rotary 78
  transport input ssh
 !
+no scheduler allocate
 !
-end
-</entry>
-            <entry key="Auto-generate config" type="Boolean">false</entry>
+end</entry>
         </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
     </node>
     <node name="R8" type="SIMPLE" subtype="IOSv" location="57,618">
         <extensions>
-            <entry key="config" type="String">
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+            <entry key="config" type="String">!
+! Last configuration change at 01:16:01 UTC Thu Oct 20 2016
 !
-! Last configuration change at 00:20:54 UTC Wed Oct 22 2014
-enable
-configure terminal
-!
-version 15.4
+version 15.6
 service timestamps debug datetime msec
 service timestamps log datetime msec
-no platform punt-keepalive disable-kernel-core
-platform console serial
+no service password-encryption
 !
 hostname R8
 !
@@ -1796,10 +1924,17 @@ vrf definition VPN_CCIE
  exit-address-family
 !
 no logging buffered
-no logging console
 no logging monitor
 !
 no aaa new-model
+ethernet lmi ce
+!
+!
+!
+mmi polling-interval 60
+no mmi auto-configure
+no mmi pvc
+mmi snmp-timeout 180
 !
 !
 !
@@ -1809,46 +1944,34 @@ no aaa new-model
 !
 !
 !
-
-
-ip multicast-routing distributed
+!
+!
 no ip domain lookup
 ip domain name ine.ccie.lab
-
-!
-!
-!
+ip multicast-routing 
+ip cef
 ipv6 unicast-routing
-!
-!
-!
-!
-!
-!
-!
-subscriber templating
+ipv6 cef
 !
 multilink bundle-name authenticated
 !
-
-license udi pid CSR1000V sn 9O1KOE672K8
-license boot level ax
-spanning-tree extend system-id
 !
+!
+crypto pki trustpoint TP-self-signed-4294967295
+ enrollment selfsigned
+ subject-name cn=IOS-Self-Signed-Certificate-4294967295
+ revocation-check none
+ rsakeypair TP-self-signed-4294967295
+!
+!
+crypto pki certificate chain TP-self-signed-4294967295
+ certificate self-signed 01 nvram:IOS-Self-Sig#1.cer
 username cisco privilege 15 secret 5 $1$G5Qe$sRxaEA1nsfl/CvdVPsY3r.
 !
 redundancy
- mode none
-!
-!
-!
-!
 !
 !
 ip tcp synwait-time 5
-ip ssh port 4022 rotary 78
-ip ssh source-interface Loopback0
-ip ssh version 2
 ! 
 !
 !
@@ -1861,9 +1984,6 @@ ip ssh version 2
 !
 !
 !
-!
-! 
-! 
 !
 interface Loopback0
  description Local Loopback
@@ -1871,9 +1991,18 @@ interface Loopback0
  ip pim sparse-mode
  ipv6 address ::192:122:3:6/128
 !
+interface GigabitEthernet0/0
+ no ip address
+ shutdown
+ duplex auto
+ speed auto
+ media-type rj45
+!
 interface GigabitEthernet0/1
- no shutdown
- negotiation auto
+ no ip address
+ duplex auto
+ speed auto
+ media-type rj45
 !
 interface GigabitEthernet0/1.18
  encapsulation dot1Q 18
@@ -1902,10 +2031,6 @@ interface GigabitEthernet0/1.89
  ip address 172.30.89.8 255.255.255.224
  ip pim sparse-mode
  ipv6 address 2001:172:30:89::8/120
-!
-interface GigabitEthernet2
- ip address 192.168.1.8 255.255.255.0
- negotiation auto
 !
 !
 router eigrp INE_CCIE
@@ -1949,20 +2074,19 @@ router bgp 65006
   neighbor 172.30.89.9 route-map RFC1998_INBOUND_SITE_B in
  exit-address-family
 !
-!
-virtual-service csr_mgmt
- ip shared host-interface GigabitEthernet2
- activate
-!
 ip forward-protocol nd
 !
 ip bgp-community new-format
 ip community-list 90 permit 65100:90
 ip community-list 99 permit 65100:999
 ip community-list 110 permit 65100:110
-ip pim bsr-candidate Loopback0 0
+!
 no ip http server
 ip http secure-server
+ip pim bsr-candidate Loopback0 0
+ip ssh port 4022 rotary 78
+ip ssh source-interface Loopback0
+ip ssh version 2
 !
 ip access-list extended SSHv2_PORT_4022
  permit tcp any any eq 4022
@@ -1982,11 +2106,38 @@ route-map RFC1998_INBOUND_SITE_B permit 30
 !
 route-map RFC1998_INBOUND_SITE_B permit 1000
 !
-mpls ldp router-id Loopback0 force
 !
+mpls ldp router-id Loopback0 force
 !
 control-plane
 !
+banner exec `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+banner incoming `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+banner login `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
 !
 line con 0
  exec-timeout 0 0
@@ -1995,6 +2146,7 @@ line con 0
  logging synchronous
  login
  stopbits 1
+line aux 0
 line vty 0 4
  access-class SSHv2_PORT_4022 in vrf-also
  login local
@@ -2013,26 +2165,22 @@ line vty 6 98
  rotary 78
  transport input ssh
 !
+no scheduler allocate
 !
-end
-</entry>
-            <entry key="Auto-generate config" type="Boolean">false</entry>
+end</entry>
         </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
     </node>
     <node name="R9" type="SIMPLE" subtype="IOSv" location="57,675">
         <extensions>
-            <entry key="config" type="String">
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+            <entry key="config" type="String">!
+! Last configuration change at 01:17:48 UTC Thu Oct 20 2016
 !
-! Last configuration change at 00:20:54 UTC Wed Oct 22 2014
-enable
-configure terminal
-!
-version 15.4
+version 15.6
 service timestamps debug datetime msec
 service timestamps log datetime msec
-no platform punt-keepalive disable-kernel-core
-platform console serial
+no service password-encryption
 !
 hostname R9
 !
@@ -2041,10 +2189,17 @@ boot-end-marker
 !
 !
 no logging buffered
-no logging console
 no logging monitor
 !
 no aaa new-model
+ethernet lmi ce
+!
+!
+!
+mmi polling-interval 60
+no mmi auto-configure
+no mmi pvc
+mmi snmp-timeout 180
 !
 !
 !
@@ -2054,38 +2209,29 @@ no aaa new-model
 !
 !
 !
-
-
+!
+!
 no ip domain lookup
-
-!
-!
-!
+ip cef
 ipv6 unicast-routing
-!
-!
-!
-!
-!
-!
-!
-subscriber templating
+ipv6 cef
 !
 multilink bundle-name authenticated
 !
-
-license udi pid CSR1000V sn 989PI5Z8M4J
-license boot level ax
-spanning-tree extend system-id
 !
+!
+crypto pki trustpoint TP-self-signed-4294967295
+ enrollment selfsigned
+ subject-name cn=IOS-Self-Signed-Certificate-4294967295
+ revocation-check none
+ rsakeypair TP-self-signed-4294967295
+!
+!
+crypto pki certificate chain TP-self-signed-4294967295
+ certificate self-signed 01 nvram:IOS-Self-Sig#1.cer
 username cisco privilege 15 secret 5 $1$kw8E$xNz3hs1XpH7ENv0puWoj0/
 !
 redundancy
- mode none
-!
-!
-!
-!
 !
 !
 ip tcp synwait-time 5
@@ -2102,17 +2248,23 @@ ip tcp synwait-time 5
 !
 !
 !
-! 
-! 
-!
 interface Loopback0
  description Local Loopback
  ip address 192.122.3.9 255.255.255.255
  ipv6 address ::192:122:3:9/128
 !
+interface GigabitEthernet0/0
+ no ip address
+ shutdown
+ duplex auto
+ speed auto
+ media-type rj45
+!
 interface GigabitEthernet0/1
- no shutdown
- negotiation auto
+ no ip address
+ duplex auto
+ speed auto
+ media-type rj45
 !
 interface GigabitEthernet0/1.79
  encapsulation dot1Q 79
@@ -2124,10 +2276,6 @@ interface GigabitEthernet0/1.89
  ip address 172.30.89.9 255.255.255.224
  ipv6 address 2001:172:30:89::9/120
 !
-interface GigabitEthernet2
- ip address 192.168.1.9 255.255.255.0
- negotiation auto
-!
 router bgp 65100
  bgp log-neighbor-changes
  network 172.30.79.0 mask 255.255.255.224
@@ -2138,12 +2286,8 @@ router bgp 65100
  neighbor 172.30.89.8 remote-as 65006
  neighbor 172.30.89.8 send-community
 !
-!
-virtual-service csr_mgmt
- ip shared host-interface GigabitEthernet2
- activate
-!
 ip forward-protocol nd
+!
 !
 no ip http server
 ip http secure-server
@@ -2153,6 +2297,33 @@ ip http secure-server
 !
 control-plane
 !
+banner exec `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+banner incoming `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+banner login `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
 !
 line con 0
  exec-timeout 0 0
@@ -2161,34 +2332,33 @@ line con 0
  logging synchronous
  login
  stopbits 1
+line aux 0
 line vty 0 4
  no login
+ transport input none
 line vty 5
  privilege level 15
  logging synchronous
  no login
  rotary 1
+ transport input none
 !
+no scheduler allocate
 !
-end
-</entry>
-            <entry key="Auto-generate config" type="Boolean">false</entry>
+end</entry>
         </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
     </node>
     <node name="R10" type="SIMPLE" subtype="IOSv" location="57,741">
         <extensions>
-            <entry key="config" type="String">
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+            <entry key="config" type="String">!
+! Last configuration change at 01:13:38 UTC Thu Oct 20 2016
 !
-! Last configuration change at 00:20:54 UTC Wed Oct 22 2014
-enable
-configure terminal
-!
-version 15.4
+version 15.6
 service timestamps debug datetime msec
 service timestamps log datetime msec
-no platform punt-keepalive disable-kernel-core
-platform console serial
+no service password-encryption
 !
 hostname R10
 !
@@ -2197,10 +2367,17 @@ boot-end-marker
 !
 !
 no logging buffered
-no logging console
 no logging monitor
 !
 no aaa new-model
+ethernet lmi ce
+!
+!
+!
+mmi polling-interval 60
+no mmi auto-configure
+no mmi pvc
+mmi snmp-timeout 180
 !
 !
 !
@@ -2210,40 +2387,22 @@ no aaa new-model
 !
 !
 !
-
-
-ip multicast-routing distributed
+!
+!
 no ip domain lookup
-
-!
-!
-!
+ip multicast-routing 
+ip cef
 ipv6 unicast-routing
-!
-!
-!
-!
-!
-!
-!
-subscriber templating
+ipv6 cef
 !
 multilink bundle-name authenticated
 !
 !
 !
-license udi pid CSR1000V sn 9MWA7QEAAU8
-license boot level ax
-spanning-tree extend system-id
 !
 username cisco privilege 15 secret 5 $1$VjTE$/YiAPH4DkXsExv6rqM5OI0
 !
 redundancy
- mode none
-!
-!
-!
-!
 !
 !
 ip tcp synwait-time 5
@@ -2260,9 +2419,6 @@ ip tcp synwait-time 5
 !
 !
 !
-! 
-! 
-!
 interface Loopback0
  description Local Loopback
  ip address 192.122.3.10 255.255.255.255
@@ -2271,9 +2427,18 @@ interface Loopback0
  ip igmp join-group 224.10.10.10
  ipv6 address ::192:122:3:10/128
 !
+interface GigabitEthernet0/0
+ no ip address
+ shutdown
+ duplex auto
+ speed auto
+ media-type rj45
+!
 interface GigabitEthernet0/1
- no shutdown
- negotiation auto
+ no ip address
+ duplex auto
+ speed auto
+ media-type rj45
 !
 interface GigabitEthernet0/1.102
  encapsulation dot1Q 102
@@ -2286,10 +2451,6 @@ interface GigabitEthernet0/1.210
  encapsulation dot1Q 210
  ip address 202.4.210.10 255.255.255.0
  ipv6 address 2001:202:4:210::10/64
-!
-interface GigabitEthernet2
- ip address 192.168.1.10 255.255.255.0
- negotiation auto
 !
 !
 router eigrp INE_CCIE
@@ -2319,10 +2480,8 @@ router bgp 65100
  redistribute eigrp 789
  neighbor 202.4.210.2 remote-as 65006
 !
-!
-virtual-service csr_mgmt
-!
 ip forward-protocol nd
+!
 !
 no ip http server
 no ip http secure-server
@@ -2332,6 +2491,33 @@ no ip http secure-server
 !
 control-plane
 !
+banner exec `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+banner incoming `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+banner login `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
 !
 line con 0
  exec-timeout 0 0
@@ -2340,25 +2526,153 @@ line con 0
  logging synchronous
  login
  stopbits 1
+line aux 0
 line vty 0 4
  privilege level 15
  no login
+ transport input none
 line vty 5
  privilege level 15
  logging synchronous
  no login
  rotary 1
+ transport input none
 !
+no scheduler allocate
 !
-end
-</entry>
-            <entry key="Auto-generate config" type="Boolean">false</entry>
+end</entry>
         </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
     </node>
     <node name="SW1" type="SIMPLE" subtype="IOSvL2" location="326,130">
         <extensions>
             <entry key="Auto-generate config" type="Boolean">false</entry>
+            <entry key="config" type="String">!
+! Last configuration change at 01:04:08 UTC Thu Oct 20 2016
+!
+version 15.2
+service timestamps debug datetime msec
+service timestamps log datetime msec
+no service password-encryption
+service compress-config
+!
+hostname Switch
+!
+boot-start-marker
+boot-end-marker
+!
+!
+!
+no aaa new-model
+!
+!
+!
+!
+!
+!
+!
+!
+ip cef
+no ipv6 cef
+!
+!
+!
+spanning-tree mode rapid-pvst
+spanning-tree extend system-id
+!
+vlan internal allocation policy ascending
+!
+! 
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface GigabitEthernet0/0
+ media-type rj45
+ negotiation auto
+!
+interface GigabitEthernet0/1
+ media-type rj45
+ negotiation auto
+!
+interface GigabitEthernet0/2
+ media-type rj45
+ negotiation auto
+!
+interface GigabitEthernet0/3
+ media-type rj45
+ negotiation auto
+!
+interface GigabitEthernet1/0
+ media-type rj45
+ negotiation auto
+!
+interface GigabitEthernet1/1
+ media-type rj45
+ negotiation auto
+!
+interface GigabitEthernet1/2
+ media-type rj45
+ negotiation auto
+!
+interface GigabitEthernet1/3
+ media-type rj45
+ negotiation auto
+!
+ip forward-protocol nd
+!
+no ip http server
+no ip http secure-server
+!
+!
+!
+!
+!
+!
+control-plane
+!
+banner exec `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+banner incoming `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+banner login `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+!
+line con 0
+line aux 0
+line vty 0 4
+!
+!
+end</entry>
         </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
         <interface id="1" name="GigabitEthernet0/2"/>
@@ -2371,6 +2685,128 @@ end
     <node name="SW2" type="SIMPLE" subtype="IOSvL2" location="560,126">
         <extensions>
             <entry key="Auto-generate config" type="Boolean">false</entry>
+            <entry key="config" type="String">!
+! Last configuration change at 01:04:04 UTC Thu Oct 20 2016
+!
+version 15.2
+service timestamps debug datetime msec
+service timestamps log datetime msec
+no service password-encryption
+service compress-config
+!
+hostname Switch
+!
+boot-start-marker
+boot-end-marker
+!
+!
+!
+no aaa new-model
+!
+!
+!
+!
+!
+!
+!
+!
+ip cef
+no ipv6 cef
+!
+!
+!
+spanning-tree mode rapid-pvst
+spanning-tree extend system-id
+!
+vlan internal allocation policy ascending
+!
+! 
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface GigabitEthernet0/0
+ media-type rj45
+ negotiation auto
+!
+interface GigabitEthernet0/1
+ media-type rj45
+ negotiation auto
+!
+interface GigabitEthernet0/2
+ media-type rj45
+ negotiation auto
+!
+interface GigabitEthernet0/3
+ media-type rj45
+ negotiation auto
+!
+interface GigabitEthernet1/0
+ media-type rj45
+ negotiation auto
+!
+interface GigabitEthernet1/1
+ media-type rj45
+ negotiation auto
+!
+interface GigabitEthernet1/2
+ media-type rj45
+ negotiation auto
+!
+ip forward-protocol nd
+!
+no ip http server
+no ip http secure-server
+!
+!
+!
+!
+!
+!
+control-plane
+!
+banner exec `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+banner incoming `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+banner login `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+!
+line con 0
+line aux 0
+line vty 0 4
+!
+!
+end</entry>
         </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
         <interface id="1" name="GigabitEthernet0/2"/>
@@ -2382,6 +2818,128 @@ end
     <node name="SW3" type="SIMPLE" subtype="IOSvL2" location="319,303">
         <extensions>
             <entry key="Auto-generate config" type="Boolean">false</entry>
+            <entry key="config" type="String">!
+! Last configuration change at 01:01:57 UTC Thu Oct 20 2016
+!
+version 15.2
+service timestamps debug datetime msec
+service timestamps log datetime msec
+no service password-encryption
+service compress-config
+!
+hostname Switch
+!
+boot-start-marker
+boot-end-marker
+!
+!
+!
+no aaa new-model
+!
+!
+!
+!
+!
+!
+!
+!
+ip cef
+no ipv6 cef
+!
+!
+!
+spanning-tree mode rapid-pvst
+spanning-tree extend system-id
+!
+vlan internal allocation policy ascending
+!
+! 
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface GigabitEthernet0/0
+ media-type rj45
+ negotiation auto
+!
+interface GigabitEthernet0/1
+ media-type rj45
+ negotiation auto
+!
+interface GigabitEthernet0/2
+ media-type rj45
+ negotiation auto
+!
+interface GigabitEthernet0/3
+ media-type rj45
+ negotiation auto
+!
+interface GigabitEthernet1/0
+ media-type rj45
+ negotiation auto
+!
+interface GigabitEthernet1/1
+ media-type rj45
+ negotiation auto
+!
+interface GigabitEthernet1/2
+ media-type rj45
+ negotiation auto
+!
+ip forward-protocol nd
+!
+no ip http server
+no ip http secure-server
+!
+!
+!
+!
+!
+!
+control-plane
+!
+banner exec `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+banner incoming `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+banner login `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+!
+line con 0
+line aux 0
+line vty 0 4
+!
+!
+end</entry>
         </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
         <interface id="1" name="GigabitEthernet0/2"/>
@@ -2393,6 +2951,128 @@ end
     <node name="SW4" type="SIMPLE" subtype="IOSvL2" location="560,302">
         <extensions>
             <entry key="Auto-generate config" type="Boolean">false</entry>
+            <entry key="config" type="String">!
+! Last configuration change at 01:04:09 UTC Thu Oct 20 2016
+!
+version 15.2
+service timestamps debug datetime msec
+service timestamps log datetime msec
+no service password-encryption
+service compress-config
+!
+hostname Switch
+!
+boot-start-marker
+boot-end-marker
+!
+!
+!
+no aaa new-model
+!
+!
+!
+!
+!
+!
+!
+!
+ip cef
+no ipv6 cef
+!
+!
+!
+spanning-tree mode rapid-pvst
+spanning-tree extend system-id
+!
+vlan internal allocation policy ascending
+!
+! 
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface GigabitEthernet0/0
+ media-type rj45
+ negotiation auto
+!
+interface GigabitEthernet0/1
+ media-type rj45
+ negotiation auto
+!
+interface GigabitEthernet0/2
+ media-type rj45
+ negotiation auto
+!
+interface GigabitEthernet0/3
+ media-type rj45
+ negotiation auto
+!
+interface GigabitEthernet1/0
+ media-type rj45
+ negotiation auto
+!
+interface GigabitEthernet1/1
+ media-type rj45
+ negotiation auto
+!
+interface GigabitEthernet1/2
+ media-type rj45
+ negotiation auto
+!
+ip forward-protocol nd
+!
+no ip http server
+no ip http secure-server
+!
+!
+!
+!
+!
+!
+control-plane
+!
+banner exec `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+banner incoming `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+banner login `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+!
+line con 0
+line aux 0
+line vty 0 4
+!
+!
+end</entry>
         </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
         <interface id="1" name="GigabitEthernet0/2"/>
@@ -2436,17 +3116,14 @@ end
     </node>
     <node name="R11" type="SIMPLE" subtype="IOSv" location="715,135">
         <extensions>
-            <entry key="config" type="String">
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+            <entry key="config" type="String">!
+! Last configuration change at 01:16:19 UTC Thu Oct 20 2016
 !
-! Last configuration change at 00:20:54 UTC Wed Oct 22 2014
-enable
-configure terminal
-!
-version 15.4
+version 15.6
 service timestamps debug datetime msec
 service timestamps log datetime msec
-no platform punt-keepalive disable-kernel-core
-platform console serial
+no service password-encryption
 !
 hostname R11
 !
@@ -2455,10 +3132,17 @@ boot-end-marker
 !
 !
 no logging buffered
-no logging console
 no logging monitor
 !
 no aaa new-model
+ethernet lmi ce
+!
+!
+!
+mmi polling-interval 60
+no mmi auto-configure
+no mmi pvc
+mmi snmp-timeout 180
 !
 !
 !
@@ -2468,39 +3152,30 @@ no aaa new-model
 !
 !
 !
-
-
-ip multicast-routing distributed
+!
+!
 no ip domain lookup
-
-!
-!
-!
+ip multicast-routing 
+ip cef
 ipv6 unicast-routing
-!
-!
-!
-!
-!
-!
-!
-subscriber templating
+ipv6 cef
 !
 multilink bundle-name authenticated
 !
-
-license udi pid CSR1000V sn 9T8WPK3T4YM
-license boot level ax
-spanning-tree extend system-id
 !
+!
+crypto pki trustpoint TP-self-signed-4294967295
+ enrollment selfsigned
+ subject-name cn=IOS-Self-Signed-Certificate-4294967295
+ revocation-check none
+ rsakeypair TP-self-signed-4294967295
+!
+!
+crypto pki certificate chain TP-self-signed-4294967295
+ certificate self-signed 01 nvram:IOS-Self-Sig#1.cer
 username cisco privilege 15 secret 5 $1$7yem$FF5hC5zHJeF8N8z2iEG5X/
 !
 redundancy
- mode none
-!
-!
-!
-!
 !
 !
 ip tcp synwait-time 5
@@ -2517,18 +3192,24 @@ ip tcp synwait-time 5
 !
 !
 !
-! 
-! 
-!
 interface Loopback0
  description Local Loopback
  ip address 192.122.3.11 255.255.255.255
  ip pim sparse-mode
  ipv6 address ::192:122:3:11/128
 !
+interface GigabitEthernet0/0
+ no ip address
+ shutdown
+ duplex auto
+ speed auto
+ media-type rj45
+!
 interface GigabitEthernet0/1
- no shutdown
- negotiation auto
+ no ip address
+ duplex auto
+ speed auto
+ media-type rj45
 !
 interface GigabitEthernet0/1.102
  encapsulation dot1Q 102
@@ -2544,10 +3225,6 @@ interface GigabitEthernet0/1.113
  ip ospf 5 area 5
  ipv6 address 2001:172:19:113::11/64
  ospfv3 5 ipv6 area 5
-!
-interface GigabitEthernet2
- ip address 192.168.1.11 255.255.255.0
- negotiation auto
 !
 !
 router eigrp INE_CCIE
@@ -2596,12 +3273,8 @@ router bgp 651011
   neighbor 192.122.3.13 activate
  exit-address-family
 !
-!
-virtual-service csr_mgmt
- ip shared host-interface GigabitEthernet2
- activate
-!
 ip forward-protocol nd
+!
 !
 no ip http server
 ip http secure-server
@@ -2611,6 +3284,33 @@ ip http secure-server
 !
 control-plane
 !
+banner exec `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+banner incoming `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+banner login `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
 !
 line con 0
  exec-timeout 0 0
@@ -2619,34 +3319,33 @@ line con 0
  logging synchronous
  login
  stopbits 1
+line aux 0
 line vty 0 4
  no login
+ transport input none
 line vty 5
  privilege level 15
  logging synchronous
  no login
  rotary 1
+ transport input none
 !
+no scheduler allocate
 !
-end
-</entry>
-            <entry key="Auto-generate config" type="Boolean">false</entry>
+end</entry>
         </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
     </node>
     <node name="R12" type="SIMPLE" subtype="IOSv" location="715,227">
         <extensions>
-            <entry key="config" type="String">
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+            <entry key="config" type="String">!
+! Last configuration change at 01:14:09 UTC Thu Oct 20 2016
 !
-! Last configuration change at 00:20:54 UTC Wed Oct 22 2014
-enable
-configure terminal
-!
-version 15.4
+version 15.6
 service timestamps debug datetime msec
 service timestamps log datetime msec
-no platform punt-keepalive disable-kernel-core
-platform console serial
+no service password-encryption
 !
 hostname R12
 !
@@ -2655,10 +3354,17 @@ boot-end-marker
 !
 !
 no logging buffered
-no logging console
 no logging monitor
 !
 no aaa new-model
+ethernet lmi ce
+!
+!
+!
+mmi polling-interval 60
+no mmi auto-configure
+no mmi pvc
+mmi snmp-timeout 180
 !
 !
 !
@@ -2668,39 +3374,30 @@ no aaa new-model
 !
 !
 !
-
-
-ip multicast-routing distributed
+!
+!
 no ip domain lookup
-
-!
-!
-!
+ip multicast-routing 
+ip cef
 ipv6 unicast-routing
-!
-!
-!
-!
-!
-!
-!
-subscriber templating
+ipv6 cef
 !
 multilink bundle-name authenticated
 !
-
-license udi pid CSR1000V sn 9RIGE0C5F9C
-license boot level ax
-spanning-tree extend system-id
 !
+!
+crypto pki trustpoint TP-self-signed-4294967295
+ enrollment selfsigned
+ subject-name cn=IOS-Self-Signed-Certificate-4294967295
+ revocation-check none
+ rsakeypair TP-self-signed-4294967295
+!
+!
+crypto pki certificate chain TP-self-signed-4294967295
+ certificate self-signed 01 nvram:IOS-Self-Sig#1.cer
 username cisco privilege 15 secret 5 $1$9ENY$vc5a.2M1dA2P.3pYLIbxI1
 !
 redundancy
- mode none
-!
-!
-!
-!
 !
 !
 ip tcp synwait-time 5
@@ -2725,24 +3422,30 @@ policy-map default
 !
 !
 !
-! 
-! 
-!
 interface Loopback0
  description Local Loopback
  ip address 192.122.3.12 255.255.255.255
  ip pim sparse-mode
  ipv6 address ::192:122:3:12/128
 !
+interface GigabitEthernet0/0
+ no ip address
+ shutdown
+ duplex auto
+ speed auto
+ media-type rj45
+!
 interface GigabitEthernet0/1
- no shutdown
- negotiation auto
+ no ip address
+ duplex auto
+ speed auto
+ media-type rj45
 !
 interface GigabitEthernet0/1.102
  encapsulation dot1Q 102
  ip address 172.19.102.12 255.255.255.128
- ip pim sparse-mode
  ip access-group range in
+ ip pim sparse-mode
  ipv6 address 2001:172:19:102::12/64
  bfd interval 150 min_rx 150 multiplier 3
 !
@@ -2753,10 +3456,6 @@ interface GigabitEthernet0/1.124
  ip ospf 5 area 5
  ipv6 address 2001:172:19:124::12/64
  ospfv3 5 ipv6 area 5
-!
-interface GigabitEthernet2
- ip address 192.168.1.12 255.255.255.0
- negotiation auto
 !
 !
 router eigrp INE_CCIE
@@ -2795,12 +3494,8 @@ router ospf 5
  summary-address 192.122.3.8 255.255.255.254
  redistribute eigrp 789 subnets
 !
-!
-virtual-service csr_mgmt
- ip shared host-interface GigabitEthernet2
- activate
-!
 ip forward-protocol nd
+!
 !
 no ip http server
 ip http secure-server
@@ -2815,6 +3510,33 @@ ip access-list extended range
 !
 control-plane
 !
+banner exec `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+banner incoming `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+banner login `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
 !
 line con 0
  exec-timeout 0 0
@@ -2823,34 +3545,33 @@ line con 0
  logging synchronous
  login
  stopbits 1
+line aux 0
 line vty 0 4
  no login
+ transport input none
 line vty 5
  privilege level 15
  logging synchronous
  no login
  rotary 1
+ transport input none
 !
+no scheduler allocate
 !
-end
-</entry>
-            <entry key="Auto-generate config" type="Boolean">false</entry>
+end</entry>
         </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
     </node>
     <node name="R13" type="SIMPLE" subtype="IOSv" location="715,298">
         <extensions>
-            <entry key="config" type="String">
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+            <entry key="config" type="String">!
+! Last configuration change at 01:16:42 UTC Thu Oct 20 2016
 !
-! Last configuration change at 00:20:54 UTC Wed Oct 22 2014
-enable
-configure terminal
-!
-version 15.4
+version 15.6
 service timestamps debug datetime msec
 service timestamps log datetime msec
-no platform punt-keepalive disable-kernel-core
-platform console serial
+no service password-encryption
 !
 hostname R13
 !
@@ -2859,10 +3580,17 @@ boot-end-marker
 !
 !
 no logging buffered
-no logging console
 no logging monitor
 !
 no aaa new-model
+ethernet lmi ce
+!
+!
+!
+mmi polling-interval 60
+no mmi auto-configure
+no mmi pvc
+mmi snmp-timeout 180
 !
 !
 !
@@ -2872,39 +3600,30 @@ no aaa new-model
 !
 !
 !
-
-
-ip multicast-routing distributed
+!
+!
 no ip domain lookup
-
-!
-!
-!
+ip multicast-routing 
+ip cef
 ipv6 unicast-routing
-!
-!
-!
-!
-!
-!
-!
-subscriber templating
+ipv6 cef
 !
 multilink bundle-name authenticated
 !
-
-license udi pid CSR1000V sn 97B6YBUT01O
-license boot level ax
-spanning-tree extend system-id
 !
+!
+crypto pki trustpoint TP-self-signed-4294967295
+ enrollment selfsigned
+ subject-name cn=IOS-Self-Signed-Certificate-4294967295
+ revocation-check none
+ rsakeypair TP-self-signed-4294967295
+!
+!
+crypto pki certificate chain TP-self-signed-4294967295
+ certificate self-signed 01 nvram:IOS-Self-Sig#1.cer
 username cisco privilege 15 secret 5 $1$xFIu$OGtcO1NjQrHx.wFJ159pX0
 !
 redundancy
- mode none
-!
-!
-!
-!
 !
 !
 ip tcp synwait-time 5
@@ -2921,9 +3640,6 @@ ip tcp synwait-time 5
 !
 !
 !
-! 
-! 
-!
 interface Loopback0
  description Local Loopback
  ip address 192.122.3.13 255.255.255.255
@@ -2932,9 +3648,18 @@ interface Loopback0
  ipv6 address ::192:122:3:13/128
  ospfv3 5 ipv6 area 5
 !
+interface GigabitEthernet0/0
+ no ip address
+ shutdown
+ duplex auto
+ speed auto
+ media-type rj45
+!
 interface GigabitEthernet0/1
- no shutdown
- negotiation auto
+ no ip address
+ duplex auto
+ speed auto
+ media-type rj45
 !
 interface GigabitEthernet0/1.113
  encapsulation dot1Q 113
@@ -2952,10 +3677,6 @@ interface GigabitEthernet0/1.134
  ip ospf 5 area 5
  ipv6 address 2001:172:19:134::13/64
  ospfv3 5 ipv6 area 5
-!
-interface GigabitEthernet2
- ip address 192.168.1.13 255.255.255.0
- negotiation auto
 !
 router ospfv3 5
  router-id 192.122.3.13
@@ -2983,17 +3704,13 @@ router bgp 651013
   neighbor 192.122.3.11 route-map default1 out
  exit-address-family
 !
-!
-virtual-service csr_mgmt
- ip shared host-interface GigabitEthernet2
- activate
-!
 ip forward-protocol nd
 !
-ip pim bsr-candidate Loopback0 0
-ip pim rp-candidate Loopback0
+!
 no ip http server
 ip http secure-server
+ip pim bsr-candidate Loopback0 0
+ip pim rp-candidate Loopback0
 !
 !
 route-map default1 permit 10
@@ -3003,6 +3720,33 @@ route-map default1 permit 10
 !
 control-plane
 !
+banner exec `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+banner incoming `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+banner login `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
 !
 line con 0
  exec-timeout 0 0
@@ -3011,34 +3755,33 @@ line con 0
  logging synchronous
  login
  stopbits 1
+line aux 0
 line vty 0 4
  no login
+ transport input none
 line vty 5
  privilege level 15
  logging synchronous
  no login
  rotary 1
+ transport input none
 !
+no scheduler allocate
 !
-end
-</entry>
-            <entry key="Auto-generate config" type="Boolean">false</entry>
+end</entry>
         </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
     </node>
     <node name="R14" type="SIMPLE" subtype="IOSv" location="715,370">
         <extensions>
-            <entry key="config" type="String">
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+            <entry key="config" type="String">!
+! Last configuration change at 01:16:36 UTC Thu Oct 20 2016
 !
-! Last configuration change at 00:20:54 UTC Wed Oct 22 2014
-enable
-configure terminal
-!
-version 15.4
+version 15.6
 service timestamps debug datetime msec
 service timestamps log datetime msec
-no platform punt-keepalive disable-kernel-core
-platform console serial
+no service password-encryption
 !
 hostname R14
 !
@@ -3047,10 +3790,17 @@ boot-end-marker
 !
 !
 no logging buffered
-no logging console
 no logging monitor
 !
 no aaa new-model
+ethernet lmi ce
+!
+!
+!
+mmi polling-interval 60
+no mmi auto-configure
+no mmi pvc
+mmi snmp-timeout 180
 !
 !
 !
@@ -3060,39 +3810,30 @@ no aaa new-model
 !
 !
 !
-
-
-ip multicast-routing distributed
+!
+!
 no ip domain lookup
-
-!
-!
-!
+ip multicast-routing 
+ip cef
 ipv6 unicast-routing
-!
-!
-!
-!
-!
-!
-!
-subscriber templating
+ipv6 cef
 !
 multilink bundle-name authenticated
 !
-
-license udi pid CSR1000V sn 9CV7ZTTD0F1
-license boot level ax
-spanning-tree extend system-id
 !
+!
+crypto pki trustpoint TP-self-signed-4294967295
+ enrollment selfsigned
+ subject-name cn=IOS-Self-Signed-Certificate-4294967295
+ revocation-check none
+ rsakeypair TP-self-signed-4294967295
+!
+!
+crypto pki certificate chain TP-self-signed-4294967295
+ certificate self-signed 01 nvram:IOS-Self-Sig#1.cer
 username cisco privilege 15 secret 5 $1$4y61$rLpzHkSTdkf9JzmzCuw2g.
 !
 redundancy
- mode none
-!
-!
-!
-!
 !
 !
 ip tcp synwait-time 5
@@ -3109,9 +3850,6 @@ ip tcp synwait-time 5
 !
 !
 !
-! 
-! 
-!
 interface Loopback0
  description Local Loopback
  ip address 192.122.3.14 255.255.255.255
@@ -3120,9 +3858,18 @@ interface Loopback0
  ipv6 address ::192:122:3:14/128
  ospfv3 5 ipv6 area 5
 !
+interface GigabitEthernet0/0
+ no ip address
+ shutdown
+ duplex auto
+ speed auto
+ media-type rj45
+!
 interface GigabitEthernet0/1
- no shutdown
- negotiation auto
+ no ip address
+ duplex auto
+ speed auto
+ media-type rj45
 !
 interface GigabitEthernet0/1.124
  encapsulation dot1Q 124
@@ -3140,10 +3887,6 @@ interface GigabitEthernet0/1.134
  ipv6 address 2001:172:19:134::14/64
  ospfv3 5 ipv6 area 5
 !
-interface GigabitEthernet2
- ip address 192.168.1.14 255.255.255.0
- negotiation auto
-!
 router ospfv3 5
  router-id 192.122.3.14
  !
@@ -3154,12 +3897,8 @@ router ospf 5
  router-id 192.122.3.14
  redistribute eigrp 789 subnets 
 !
-!
-virtual-service csr_mgmt
- ip shared host-interface GigabitEthernet2
- activate
-!
 ip forward-protocol nd
+!
 !
 no ip http server
 ip http secure-server
@@ -3169,6 +3908,33 @@ ip http secure-server
 !
 control-plane
 !
+banner exec `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+banner incoming `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+banner login `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
 !
 line con 0
  exec-timeout 0 0
@@ -3177,34 +3943,33 @@ line con 0
  logging synchronous
  login
  stopbits 1
+line aux 0
 line vty 0 4
  no login
+ transport input none
 line vty 5
  privilege level 15
  logging synchronous
  no login
  rotary 1
+ transport input none
 !
+no scheduler allocate
 !
-end
-</entry>
-            <entry key="Auto-generate config" type="Boolean">false</entry>
+end</entry>
         </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
     </node>
     <node name="R15" type="SIMPLE" subtype="IOSv" location="715,441">
         <extensions>
-            <entry key="config" type="String">
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+            <entry key="config" type="String">!
+! Last configuration change at 01:17:16 UTC Thu Oct 20 2016
 !
-! Last configuration change at 00:20:54 UTC Wed Oct 22 2014
-enable
-configure terminal
-!
-version 15.4
+version 15.6
 service timestamps debug datetime msec
 service timestamps log datetime msec
-no platform punt-keepalive disable-kernel-core
-platform console serial
+no service password-encryption
 !
 hostname R15
 !
@@ -3246,10 +4011,17 @@ vrf definition server3
  exit-address-family
 !
 no logging buffered
-no logging console
 no logging monitor
 !
 no aaa new-model
+ethernet lmi ce
+!
+!
+!
+mmi polling-interval 60
+no mmi auto-configure
+no mmi pvc
+mmi snmp-timeout 180
 !
 !
 !
@@ -3258,41 +4030,32 @@ no aaa new-model
 !
 !
 !
-!
-
-
-ip multicast-routing distributed
-no ip domain lookup
-
 no ip dhcp use vrf connected
 !
 !
 !
+no ip domain lookup
+ip multicast-routing 
+ip cef
 ipv6 unicast-routing
-!
-!
-!
-!
-!
-!
-!
-subscriber templating
+ipv6 cef
 !
 multilink bundle-name authenticated
 !
-
-license udi pid CSR1000V sn 9FSD6IRBA2E
-license boot level ax
-spanning-tree extend system-id
 !
+!
+crypto pki trustpoint TP-self-signed-4294967295
+ enrollment selfsigned
+ subject-name cn=IOS-Self-Signed-Certificate-4294967295
+ revocation-check none
+ rsakeypair TP-self-signed-4294967295
+!
+!
+crypto pki certificate chain TP-self-signed-4294967295
+ certificate self-signed 01 nvram:IOS-Self-Sig#1.cer
 username cisco privilege 15 secret 5 $1$IKXX$nFdbE6Pr.gJqZI5FbiaNA.
 !
 redundancy
- mode none
-!
-!
-!
-!
 !
 !
 ip tcp synwait-time 5
@@ -3308,9 +4071,6 @@ ip tcp synwait-time 5
 !
 !
 !
-!
-! 
-! 
 !
 interface Loopback0
  description Local Loopback
@@ -3345,9 +4105,18 @@ interface Loopback180
  no ip address
  ipv6 address 2004:180::2/32
 !
+interface GigabitEthernet0/0
+ no ip address
+ shutdown
+ duplex auto
+ speed auto
+ media-type rj45
+!
 interface GigabitEthernet0/1
- no shutdown
- negotiation auto
+ no ip address
+ duplex auto
+ speed auto
+ media-type rj45
 !
 interface GigabitEthernet0/1.60
  encapsulation dot1Q 60
@@ -3387,10 +4156,6 @@ interface GigabitEthernet0/1.192
  vrf forwarding server1
  ip address 172.27.192.100 255.255.255.0
  ipv6 address 2001:172:27:192::100/64
-!
-interface GigabitEthernet2
- ip address 192.168.1.15 255.255.255.0
- negotiation auto
 !
 !
 router eigrp SERVERS
@@ -3439,12 +4204,8 @@ router bgp 65123
   neighbor 2001:202:4:60:: send-community both
  exit-address-family
 !
-!
-virtual-service csr_mgmt
- ip shared host-interface GigabitEthernet2
- activate
-!
 ip forward-protocol nd
+!
 !
 no ip http server
 ip http secure-server
@@ -3462,6 +4223,33 @@ route-map IPv6_INTERNET_ROUTES permit 20
 !
 control-plane
 !
+banner exec `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+banner incoming `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+banner login `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
 !
 line con 0
  exec-timeout 0 0
@@ -3470,34 +4258,33 @@ line con 0
  logging synchronous
  login
  stopbits 1
+line aux 0
 line vty 0 4
  no login
+ transport input none
 line vty 5
  privilege level 15
  logging synchronous
  no login
  rotary 1
+ transport input none
 !
+no scheduler allocate
 !
-end
-</entry>
-            <entry key="Auto-generate config" type="Boolean">false</entry>
+end</entry>
         </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
     </node>
     <node name="R16" type="SIMPLE" subtype="IOSv" location="715,498">
         <extensions>
-            <entry key="config" type="String">
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+            <entry key="config" type="String">!
+! Last configuration change at 01:17:28 UTC Thu Oct 20 2016
 !
-! Last configuration change at 00:20:54 UTC Wed Oct 22 2014
-enable
-configure terminal
-!
-version 15.4
+version 15.6
 service timestamps debug datetime msec
 service timestamps log datetime msec
-no platform punt-keepalive disable-kernel-core
-platform console serial
+no service password-encryption
 !
 hostname R16
 !
@@ -3506,10 +4293,17 @@ boot-end-marker
 !
 !
 no logging buffered
-no logging console
 no logging monitor
 !
 no aaa new-model
+ethernet lmi ce
+!
+!
+!
+mmi polling-interval 60
+no mmi auto-configure
+no mmi pvc
+mmi snmp-timeout 180
 !
 !
 !
@@ -3519,43 +4313,33 @@ no aaa new-model
 !
 !
 !
-
-
+!
+!
 no ip domain lookup
-
-!
-!
-!
+ip cef
 ipv6 unicast-routing
-!
-!
-!
-!
-!
-!
-!
-subscriber templating
+ipv6 cef
 !
 multilink bundle-name authenticated
 !
-
-license udi pid CSR1000V sn 90Y69TXLGPT
-license boot level ax
-spanning-tree extend system-id
 !
+!
+crypto pki trustpoint TP-self-signed-4294967295
+ enrollment selfsigned
+ subject-name cn=IOS-Self-Signed-Certificate-4294967295
+ revocation-check none
+ rsakeypair TP-self-signed-4294967295
+!
+!
+crypto pki certificate chain TP-self-signed-4294967295
+ certificate self-signed 01 nvram:IOS-Self-Sig#1.cer
 username cisco privilege 15 secret 5 $1$1EVq$/stT3SQkkkdPv.z.52dEw0
 !
 redundancy
- mode none
-!
-!
-!
-!
 !
 !
 ip tcp synwait-time 5
 ! 
-!
 !
 !
 !
@@ -3580,8 +4364,6 @@ crypto ipsec profile DMVPN_PROFILE
 !
 !
 !
-! 
-! 
 !
 interface Loopback0
  description Local Loopback
@@ -3603,9 +4385,18 @@ interface Tunnel100
  tunnel mode gre multipoint
  tunnel protection ipsec profile DMVPN_PROFILE
 !
+interface GigabitEthernet0/0
+ no ip address
+ shutdown
+ duplex auto
+ speed auto
+ media-type rj45
+!
 interface GigabitEthernet0/1
- no shutdown
- negotiation auto
+ no ip address
+ duplex auto
+ speed auto
+ media-type rj45
 !
 interface GigabitEthernet0/1.116
  encapsulation dot1Q 116
@@ -3627,10 +4418,6 @@ interface GigabitEthernet0/1.216
  ip ospf 100 area 121
  ipv6 address 2001:202:4:216::16/64
 !
-interface GigabitEthernet2
- ip address 192.168.1.16 255.255.255.0
- negotiation auto
-!
 !
 router eigrp INE_CCIE
  !
@@ -3648,19 +4435,14 @@ router eigrp INE_CCIE
  exit-address-family
 !
 router ospf 100
+ mpls ldp autoconfig
  router-id 192.122.3.16
  max-lsa 1
- fast-reroute per-prefix enable prefix-priority low
  area 121 nssa
  redistribute connected subnets route-map CONNECTED_INTO_OSPF
- mpls ldp autoconfig
-!
-!
-virtual-service csr_mgmt
- ip shared host-interface GigabitEthernet2
- activate
 !
 ip forward-protocol nd
+!
 !
 no ip http server
 ip http secure-server
@@ -3669,11 +4451,38 @@ ip http secure-server
 route-map CONNECTED_INTO_OSPF permit 10
  match interface Loopback0
 !
-mpls ldp router-id Loopback0 force
 !
+mpls ldp router-id Loopback0 force
 !
 control-plane
 !
+banner exec `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+banner incoming `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+banner login `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
 !
 line con 0
  exec-timeout 0 0
@@ -3682,34 +4491,33 @@ line con 0
  logging synchronous
  login
  stopbits 1
+line aux 0
 line vty 0 4
  no login
+ transport input none
 line vty 5
  privilege level 15
  logging synchronous
  no login
  rotary 1
+ transport input none
 !
+no scheduler allocate
 !
-end
-</entry>
-            <entry key="Auto-generate config" type="Boolean">false</entry>
+end</entry>
         </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
     </node>
     <node name="R17" type="SIMPLE" subtype="IOSv" location="715,575">
         <extensions>
-            <entry key="config" type="String">
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+            <entry key="config" type="String">!
+! Last configuration change at 01:17:48 UTC Thu Oct 20 2016
 !
-! Last configuration change at 00:20:54 UTC Wed Oct 22 2014
-enable
-configure terminal
-!
-version 15.4
+version 15.6
 service timestamps debug datetime msec
 service timestamps log datetime msec
-no platform punt-keepalive disable-kernel-core
-platform console serial
+no service password-encryption
 !
 hostname R17
 !
@@ -3718,10 +4526,17 @@ boot-end-marker
 !
 !
 no logging buffered
-no logging console
 no logging monitor
 !
 no aaa new-model
+ethernet lmi ce
+!
+!
+!
+mmi polling-interval 60
+no mmi auto-configure
+no mmi pvc
+mmi snmp-timeout 180
 !
 !
 !
@@ -3730,11 +4545,6 @@ no aaa new-model
 !
 !
 !
-!
-
-
-no ip domain lookup
-
 !
 ip dhcp pool r1-r17-pool
  import all
@@ -3742,36 +4552,31 @@ ip dhcp pool r1-r17-pool
 !
 !
 !
+no ip domain lookup
+ip cef
 ipv6 unicast-routing
-!
-!
-!
-!
-!
-!
-!
-subscriber templating
+ipv6 cef
 !
 multilink bundle-name authenticated
 !
-
-license udi pid CSR1000V sn 9ZKEEWZ6S6H
-license boot level ax
-spanning-tree extend system-id
 !
+!
+crypto pki trustpoint TP-self-signed-4294967295
+ enrollment selfsigned
+ subject-name cn=IOS-Self-Signed-Certificate-4294967295
+ revocation-check none
+ rsakeypair TP-self-signed-4294967295
+!
+!
+crypto pki certificate chain TP-self-signed-4294967295
+ certificate self-signed 01 nvram:IOS-Self-Sig#1.cer
 username cisco privilege 15 secret 5 $1$ArPL$WcQ3Rb1JjpEohKcboGII5/
 !
 redundancy
- mode none
-!
-!
-!
-!
 !
 !
 ip tcp synwait-time 5
 ! 
-!
 !
 !
 !
@@ -3796,8 +4601,6 @@ crypto ipsec profile DMVPN_PROFILE
 !
 !
 !
-! 
-! 
 !
 interface Loopback0
  description Local Loopback
@@ -3822,24 +4625,29 @@ interface Tunnel100
 interface Tunnel200
  no ip address
 !
+interface GigabitEthernet0/0
+ no ip address
+ shutdown
+ duplex auto
+ speed auto
+ media-type rj45
+!
 interface GigabitEthernet0/1
- no shutdown
- negotiation auto
+ no ip address
+ duplex auto
+ speed auto
+ media-type rj45
 !
 interface GigabitEthernet0/1.117
  encapsulation dot1Q 117
  ipv6 address 2001:89:211:117::17/125
- pppoe enable
+ pppoe enable group global
  pppoe-client dial-pool-number 117
 !
 interface GigabitEthernet0/1.170
  encapsulation dot1Q 170
  ip address 172.25.170.17 255.255.255.0
  ipv6 address 2001:172:25:170::17/64
-!
-interface GigabitEthernet2
- ip address 192.168.1.17 255.255.255.0
- negotiation auto
 !
 interface Dialer117
  ip address pool r1-r17-pool
@@ -3869,12 +4677,8 @@ router eigrp INE_CCIE
 router ospf 100
  passive-interface default
 !
-!
-virtual-service csr_mgmt
- ip shared host-interface GigabitEthernet2
- activate
-!
 ip forward-protocol nd
+!
 !
 no ip http server
 ip http secure-server
@@ -3884,6 +4688,33 @@ ip http secure-server
 !
 control-plane
 !
+banner exec `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+banner incoming `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+banner login `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
 !
 line con 0
  exec-timeout 0 0
@@ -3892,34 +4723,33 @@ line con 0
  logging synchronous
  login
  stopbits 1
+line aux 0
 line vty 0 4
  no login
+ transport input none
 line vty 5
  privilege level 15
  logging synchronous
  no login
  rotary 1
+ transport input none
 !
+no scheduler allocate
 !
-end
-</entry>
-            <entry key="Auto-generate config" type="Boolean">false</entry>
+end</entry>
         </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
     </node>
     <node name="R18" type="SIMPLE" subtype="IOSv" location="715,638">
         <extensions>
-            <entry key="config" type="String">
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+            <entry key="config" type="String">!
+! Last configuration change at 01:18:19 UTC Thu Oct 20 2016
 !
-! Last configuration change at 00:20:54 UTC Wed Oct 22 2014
-enable
-configure terminal
-!
-version 15.4
+version 15.6
 service timestamps debug datetime msec
 service timestamps log datetime msec
-no platform punt-keepalive disable-kernel-core
-platform console serial
+no service password-encryption
 !
 hostname R18
 !
@@ -3928,10 +4758,17 @@ boot-end-marker
 !
 !
 no logging buffered
-no logging console
 no logging monitor
 !
 no aaa new-model
+ethernet lmi ce
+!
+!
+!
+mmi polling-interval 60
+no mmi auto-configure
+no mmi pvc
+mmi snmp-timeout 180
 !
 !
 !
@@ -3941,24 +4778,15 @@ no aaa new-model
 !
 !
 !
-
-
+!
+!
 no ip domain lookup
-
-!
-!
-!
+ip cef
 ipv6 unicast-routing
-!
-!
-!
-!
-!
-!
-!
-subscriber templating
+ipv6 cef
 !
 multilink bundle-name authenticated
+!
 !
 !
 crypto pki trustpoint TP-self-signed-121669247
@@ -3967,19 +4795,11 @@ crypto pki trustpoint TP-self-signed-121669247
  revocation-check none
  rsakeypair TP-self-signed-121669247
 !
-
-license udi pid CSR1000V sn 99IBUFLFZQE
-license boot level ax
-spanning-tree extend system-id
 !
+crypto pki certificate chain TP-self-signed-121669247
 username cisco privilege 15 secret 5 $1$o0Cg$friQqIsvBIvZac7UX9pQd1
 !
 redundancy
- mode none
-!
-!
-!
-!
 !
 !
 ip tcp synwait-time 5
@@ -3992,7 +4812,6 @@ policy-map default
   police 8000 conform-action drop 
 !
 ! 
-!
 !
 !
 !
@@ -4017,8 +4836,6 @@ crypto ipsec profile DMVPN_PROFILE
 !
 !
 !
-! 
-! 
 !
 interface Loopback0
  description Local Loopback
@@ -4039,9 +4856,18 @@ interface Tunnel100
  tunnel mode gre multipoint
  tunnel protection ipsec profile DMVPN_PROFILE
 !
+interface GigabitEthernet0/0
+ no ip address
+ shutdown
+ duplex auto
+ speed auto
+ media-type rj45
+!
 interface GigabitEthernet0/1
- no shutdown
- negotiation auto
+ no ip address
+ duplex auto
+ speed auto
+ media-type rj45
 !
 interface GigabitEthernet0/1.180
  encapsulation dot1Q 180
@@ -4058,10 +4884,6 @@ interface GigabitEthernet0/1.182
  ip address 172.27.182.18 255.255.255.0
  ipv6 address 2001:172:27:182::18/64
  service-policy input default
-!
-interface GigabitEthernet2
- ip address 192.168.1.18 255.255.255.0
- negotiation auto
 !
 !
 router eigrp INE_CCIE
@@ -4085,12 +4907,8 @@ router bgp 65456
  network 202.4.180.0 mask 255.255.255.254
  neighbor 202.4.180.1 remote-as 65123
 !
-!
-virtual-service csr_mgmt
- ip shared host-interface GigabitEthernet2
- activate
-!
 ip forward-protocol nd
+!
 !
 no ip http server
 ip http secure-server
@@ -4103,6 +4921,33 @@ ip access-list extended default
 !
 control-plane
 !
+banner exec `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+banner incoming `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+banner login `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
 !
 line con 0
  exec-timeout 0 0
@@ -4111,34 +4956,33 @@ line con 0
  logging synchronous
  login
  stopbits 1
+line aux 0
 line vty 0 4
  no login
+ transport input none
 line vty 5
  privilege level 15
  logging synchronous
  no login
  rotary 1
+ transport input none
 !
+no scheduler allocate
 !
-end
-</entry>
-            <entry key="Auto-generate config" type="Boolean">false</entry>
+end</entry>
         </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
     </node>
     <node name="R19" type="SIMPLE" subtype="IOSv" location="715,709">
         <extensions>
-            <entry key="config" type="String">
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+            <entry key="config" type="String">!
+! Last configuration change at 01:18:18 UTC Thu Oct 20 2016
 !
-! Last configuration change at 00:20:54 UTC Wed Oct 22 2014
-enable
-configure terminal
-!
-version 15.4
+version 15.6
 service timestamps debug datetime msec
 service timestamps log datetime msec
-no platform punt-keepalive disable-kernel-core
-platform console serial
+no service password-encryption
 !
 hostname R19
 !
@@ -4147,10 +4991,17 @@ boot-end-marker
 !
 !
 no logging buffered
-no logging console
 no logging monitor
 !
 no aaa new-model
+ethernet lmi ce
+!
+!
+!
+mmi polling-interval 60
+no mmi auto-configure
+no mmi pvc
+mmi snmp-timeout 180
 !
 !
 !
@@ -4160,38 +5011,29 @@ no aaa new-model
 !
 !
 !
-
-
+!
+!
 no ip domain lookup
-
-!
-!
-!
+ip cef
 ipv6 unicast-routing
-!
-!
-!
-!
-!
-!
-!
-subscriber templating
+ipv6 cef
 !
 multilink bundle-name authenticated
 !
-
-license udi pid CSR1000V sn 92D2M7P9WXB
-license boot level ax
-spanning-tree extend system-id
 !
+!
+crypto pki trustpoint TP-self-signed-4294967295
+ enrollment selfsigned
+ subject-name cn=IOS-Self-Signed-Certificate-4294967295
+ revocation-check none
+ rsakeypair TP-self-signed-4294967295
+!
+!
+crypto pki certificate chain TP-self-signed-4294967295
+ certificate self-signed 01 nvram:IOS-Self-Sig#1.cer
 username cisco privilege 15 secret 5 $1$3CFZ$arROYO/si4TTNuyW4SQ2I0
 !
 redundancy
- mode none
-!
-!
-!
-!
 !
 !
 ip tcp synwait-time 5
@@ -4208,17 +5050,23 @@ ip tcp synwait-time 5
 !
 !
 !
-! 
-! 
-!
 interface Loopback0
  description Local Loopback
  ip address 192.122.3.19 255.255.255.255
  ipv6 address ::192:122:3:19/128
 !
+interface GigabitEthernet0/0
+ no ip address
+ shutdown
+ duplex auto
+ speed auto
+ media-type rj45
+!
 interface GigabitEthernet0/1
- no shutdown
- negotiation auto
+ no ip address
+ duplex auto
+ speed auto
+ media-type rj45
 !
 interface GigabitEthernet0/1.181
  encapsulation dot1Q 181
@@ -4234,10 +5082,6 @@ interface GigabitEthernet0/1.192
  standby 192 preempt
  standby 192 authentication md5 key-string SERVER_VIP
  ipv6 address 2001:172:27:192::19/64
-!
-interface GigabitEthernet2
- ip address 192.168.1.19 255.255.255.0
- negotiation auto
 !
 !
 router eigrp INE_CCIE
@@ -4255,12 +5099,8 @@ router eigrp INE_CCIE
   network 192.122.3.19 0.0.0.0
  exit-address-family
 !
-!
-virtual-service csr_mgmt
- ip shared host-interface GigabitEthernet2
- activate
-!
 ip forward-protocol nd
+!
 !
 no ip http server
 ip http secure-server
@@ -4270,6 +5110,33 @@ ip http secure-server
 !
 control-plane
 !
+banner exec `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+banner incoming `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+banner login `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
 !
 line con 0
  exec-timeout 0 0
@@ -4278,34 +5145,33 @@ line con 0
  logging synchronous
  login
  stopbits 1
+line aux 0
 line vty 0 4
  no login
+ transport input none
 line vty 5
  privilege level 15
  logging synchronous
  no login
  rotary 1
+ transport input none
 !
+no scheduler allocate
 !
-end
-</entry>
-            <entry key="Auto-generate config" type="Boolean">false</entry>
+end</entry>
         </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
     </node>
     <node name="R20" type="SIMPLE" subtype="IOSv" location="715,774">
         <extensions>
-            <entry key="config" type="String">
+            <entry key="Auto-generate config" type="Boolean">false</entry>
+            <entry key="config" type="String">!
+! Last configuration change at 01:17:19 UTC Thu Oct 20 2016
 !
-! Last configuration change at 00:20:54 UTC Wed Oct 22 2014
-enable
-configure terminal
-!
-version 15.4
+version 15.6
 service timestamps debug datetime msec
 service timestamps log datetime msec
-no platform punt-keepalive disable-kernel-core
-platform console serial
+no service password-encryption
 !
 hostname R20
 !
@@ -4314,10 +5180,17 @@ boot-end-marker
 !
 !
 no logging buffered
-no logging console
 no logging monitor
 !
 no aaa new-model
+ethernet lmi ce
+!
+!
+!
+mmi polling-interval 60
+no mmi auto-configure
+no mmi pvc
+mmi snmp-timeout 180
 !
 !
 !
@@ -4327,37 +5200,29 @@ no aaa new-model
 !
 !
 !
-
-
+!
+!
 no ip domain lookup
-
-!
-!
-!
+ip cef
 ipv6 unicast-routing
-!
-!
-!
-!
-!
-!
-!
-subscriber templating
+ipv6 cef
 !
 multilink bundle-name authenticated
 !
-license udi pid CSR1000V sn 9RVSNJLIZK3
-license boot level ax
-spanning-tree extend system-id
 !
+!
+crypto pki trustpoint TP-self-signed-4294967295
+ enrollment selfsigned
+ subject-name cn=IOS-Self-Signed-Certificate-4294967295
+ revocation-check none
+ rsakeypair TP-self-signed-4294967295
+!
+!
+crypto pki certificate chain TP-self-signed-4294967295
+ certificate self-signed 01 nvram:IOS-Self-Sig#1.cer
 username cisco privilege 15 secret 5 $1$oHpi$a5vxt0Tr0eJ3M79GQCBFL.
 !
 redundancy
- mode none
-!
-!
-!
-!
 !
 !
 track 192 ip sla 10
@@ -4371,15 +5236,36 @@ policy-map default
  class default
   police 8000 conform-action drop 
 !
+! 
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
 !
 interface Loopback0
  description Local Loopback
  ip address 192.122.3.20 255.255.255.255
  ipv6 address ::192:122:3:20/128
 !
+interface GigabitEthernet0/0
+ no ip address
+ shutdown
+ duplex auto
+ speed auto
+ media-type rj45
+!
 interface GigabitEthernet0/1
- no shutdown
- negotiation auto
+ no ip address
+ duplex auto
+ speed auto
+ media-type rj45
 !
 interface GigabitEthernet0/1.182
  encapsulation dot1Q 182
@@ -4397,10 +5283,6 @@ interface GigabitEthernet0/1.192
  standby 192 track 192 decrement 50
  ipv6 address 2001:172:27:192::20/64
 !
-interface GigabitEthernet2
- ip address 192.168.1.20 255.255.255.0
- negotiation auto
-!
 !
 router eigrp INE_CCIE
  !
@@ -4417,12 +5299,8 @@ router eigrp INE_CCIE
   network 192.122.3.20 0.0.0.0
  exit-address-family
 !
-!
-virtual-service csr_mgmt
- ip shared host-interface GigabitEthernet2
- activate
-!
 ip forward-protocol nd
+!
 !
 no ip http server
 ip http secure-server
@@ -4438,6 +5316,33 @@ control-plane host
 !
 control-plane
 !
+banner exec `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+banner incoming `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+banner login `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
 !
 line con 0
  exec-timeout 0 0
@@ -4446,18 +5351,20 @@ line con 0
  logging synchronous
  login
  stopbits 1
+line aux 0
 line vty 0 4
  no login
+ transport input none
 line vty 5
  privilege level 15
  logging synchronous
  no login
  rotary 1
+ transport input none
 !
+no scheduler allocate
 !
-end
-</entry>
-            <entry key="Auto-generate config" type="Boolean">false</entry>
+end</entry>
         </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
     </node>
