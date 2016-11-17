@@ -62,41 +62,140 @@
     </node>
     <node name="SW1" type="SIMPLE" subtype="IOSvL2" location="346,347">
         <extensions>
+            <entry key="Auto-generate config" type="Boolean">false</entry>
             <entry key="config" type="String">!
-version 15.2
+! Last configuration change at 17:22:21 UTC Thu Nov 17 2016
 !
-enable
-configure terminal
+version 15.2
 no service timestamps debug uptime
 no service timestamps log uptime
 no service password-encryption
+service compress-config
 !
 hostname SW1
 !
-vtp domain CCIE
-vtp mode client
+boot-start-marker
+boot-end-marker
+!
+!
+!
+no aaa new-model
+!
+!
+!
+!
+!
+!
+!
 !
 no ip domain-lookup
+ip cef
+no ipv6 cef
+!
+!
+!
 spanning-tree mode pvst
 spanning-tree extend system-id
 !
+vlan internal allocation policy ascending
 !
-interface range FastEthernet0/19 - 24
- switchport mode dynamic desirable
- switchport trunk encapsulation dot1q
+! 
 !
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface GigabitEthernet0/0
+ media-type rj45
+ negotiation auto
+!
+interface GigabitEthernet0/1
+ media-type rj45
+ negotiation auto
+!
+interface GigabitEthernet0/2
+ media-type rj45
+ negotiation auto
+!
+interface GigabitEthernet0/3
+ media-type rj45
+ negotiation auto
+!
+interface GigabitEthernet1/0
+ media-type rj45
+ negotiation auto
+!
+interface GigabitEthernet1/1
+ media-type rj45
+ negotiation auto
+!
+interface GigabitEthernet1/2
+ media-type rj45
+ negotiation auto
+!
+interface GigabitEthernet1/3
+ media-type rj45
+ negotiation auto
+!
+ip forward-protocol nd
+!
+no ip http server
+no ip http secure-server
+!
+!
+!
+!
+!
+!
+control-plane
+!
+banner exec `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+banner incoming `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+banner login `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
 !
 line con 0
  exec-timeout 0 0
+ privilege level 15
  logging synchronous
+line aux 0
 line vty 0 4
  no login
 line vty 5 15
  no login
 !
-end
-</entry>
-            <entry key="Auto-generate config" type="Boolean">false</entry>
+!
+end</entry>
         </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
         <interface id="1" name="GigabitEthernet0/2"/>
@@ -108,43 +207,136 @@ end
     </node>
     <node name="SW2" type="SIMPLE" subtype="IOSvL2" location="580,343">
         <extensions>
+            <entry key="Auto-generate config" type="Boolean">false</entry>
             <entry key="config" type="String">!
-version 15.2
+! Last configuration change at 17:22:42 UTC Thu Nov 17 2016
 !
-enable
-configure terminal
+version 15.2
 no service timestamps debug uptime
 no service timestamps log uptime
 no service password-encryption
+service compress-config
 !
 hostname SW2
 !
-vtp domain CCIE
-vtp mode server
-vlan 5,7,8,9,10,22,43,58,67,79,146
+boot-start-marker
+boot-end-marker
+!
+!
+!
+no aaa new-model
+!
+!
+!
+!
+!
+!
+!
 !
 no ip domain-lookup
+ip cef
+no ipv6 cef
+!
+!
+!
 spanning-tree mode pvst
 spanning-tree extend system-id
 !
+vlan internal allocation policy ascending
 !
-interface range FastEthernet0/19 - 24
- switchport trunk encapsulation dot1q
- switchport mode dynamic auto
+! 
 !
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface GigabitEthernet0/0
+ media-type rj45
+ negotiation auto
+!
+interface GigabitEthernet0/1
+ media-type rj45
+ negotiation auto
+!
+interface GigabitEthernet0/2
+ media-type rj45
+ negotiation auto
+!
+interface GigabitEthernet0/3
+ media-type rj45
+ negotiation auto
+!
+interface GigabitEthernet1/0
+ media-type rj45
+ negotiation auto
+!
+interface GigabitEthernet1/1
+ media-type rj45
+ negotiation auto
+!
+interface GigabitEthernet1/2
+ media-type rj45
+ negotiation auto
+!
+ip forward-protocol nd
+!
+no ip http server
+no ip http secure-server
+!
+!
+!
+!
+!
+!
+control-plane
+!
+banner exec `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+banner incoming `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+banner login `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
 !
 line con 0
  exec-timeout 0 0
+ privilege level 15
  logging synchronous
+line aux 0
 line vty 0 4
  no login
 line vty 5 15
  no login
 !
-end
-
-</entry>
-            <entry key="Auto-generate config" type="Boolean">false</entry>
+!
+end</entry>
         </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
         <interface id="1" name="GigabitEthernet0/2"/>
@@ -155,42 +347,136 @@ end
     </node>
     <node name="SW3" type="SIMPLE" subtype="IOSvL2" location="339,520">
         <extensions>
+            <entry key="Auto-generate config" type="Boolean">false</entry>
             <entry key="config" type="String">!
-version 15.2
+! Last configuration change at 17:22:48 UTC Thu Nov 17 2016
 !
-enable
-configure terminal
+version 15.2
 no service timestamps debug uptime
 no service timestamps log uptime
 no service password-encryption
+service compress-config
 !
 hostname SW3
 !
-vtp domain CCIE
-vtp mode client
+boot-start-marker
+boot-end-marker
+!
+!
+!
+no aaa new-model
+!
+!
+!
+!
+!
+!
+!
 !
 no ip domain-lookup
+ip cef
+no ipv6 cef
+!
+!
+!
 spanning-tree mode pvst
 spanning-tree extend system-id
 !
+vlan internal allocation policy ascending
 !
-interface range FastEthernet0/19 - 24
- switchport trunk encapsulation dot1q
- switchport mode dynamic auto
+! 
 !
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface GigabitEthernet0/0
+ media-type rj45
+ negotiation auto
+!
+interface GigabitEthernet0/1
+ media-type rj45
+ negotiation auto
+!
+interface GigabitEthernet0/2
+ media-type rj45
+ negotiation auto
+!
+interface GigabitEthernet0/3
+ media-type rj45
+ negotiation auto
+!
+interface GigabitEthernet1/0
+ media-type rj45
+ negotiation auto
+!
+interface GigabitEthernet1/1
+ media-type rj45
+ negotiation auto
+!
+interface GigabitEthernet1/2
+ media-type rj45
+ negotiation auto
+!
+ip forward-protocol nd
+!
+no ip http server
+no ip http secure-server
+!
+!
+!
+!
+!
+!
+control-plane
+!
+banner exec `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+banner incoming `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+banner login `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
 !
 line con 0
  exec-timeout 0 0
+ privilege level 15
  logging synchronous
+line aux 0
 line vty 0 4
  no login
 line vty 5 15
  no login
 !
-end
-
-</entry>
-            <entry key="Auto-generate config" type="Boolean">false</entry>
+!
+end</entry>
         </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
         <interface id="1" name="GigabitEthernet0/2"/>
@@ -201,42 +487,136 @@ end
     </node>
     <node name="SW4" type="SIMPLE" subtype="IOSvL2" location="580,519">
         <extensions>
+            <entry key="Auto-generate config" type="Boolean">false</entry>
             <entry key="config" type="String">!
-version 15.2
+! Last configuration change at 17:22:34 UTC Thu Nov 17 2016
 !
-enable
-configure terminal
+version 15.2
 no service timestamps debug uptime
 no service timestamps log uptime
 no service password-encryption
+service compress-config
 !
 hostname SW4
 !
-vtp domain CCIE
-vtp mode client
+boot-start-marker
+boot-end-marker
+!
+!
+!
+no aaa new-model
+!
+!
+!
+!
+!
+!
+!
 !
 no ip domain-lookup
+ip cef
+no ipv6 cef
+!
+!
+!
 spanning-tree mode pvst
 spanning-tree extend system-id
 !
+vlan internal allocation policy ascending
 !
-interface range FastEthernet0/19 - 24
- switchport trunk encapsulation dot1q
- switchport mode dynamic auto
+! 
 !
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface GigabitEthernet0/0
+ media-type rj45
+ negotiation auto
+!
+interface GigabitEthernet0/1
+ media-type rj45
+ negotiation auto
+!
+interface GigabitEthernet0/2
+ media-type rj45
+ negotiation auto
+!
+interface GigabitEthernet0/3
+ media-type rj45
+ negotiation auto
+!
+interface GigabitEthernet1/0
+ media-type rj45
+ negotiation auto
+!
+interface GigabitEthernet1/1
+ media-type rj45
+ negotiation auto
+!
+interface GigabitEthernet1/2
+ media-type rj45
+ negotiation auto
+!
+ip forward-protocol nd
+!
+no ip http server
+no ip http secure-server
+!
+!
+!
+!
+!
+!
+control-plane
+!
+banner exec `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+banner incoming `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
+banner login `
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************`
 !
 line con 0
  exec-timeout 0 0
+ privilege level 15
  logging synchronous
+line aux 0
 line vty 0 4
  no login
 line vty 5 15
  no login
 !
-end
-
-</entry>
-            <entry key="Auto-generate config" type="Boolean">false</entry>
+!
+end</entry>
         </extensions>
         <interface id="0" name="GigabitEthernet0/1"/>
         <interface id="1" name="GigabitEthernet0/2"/>
